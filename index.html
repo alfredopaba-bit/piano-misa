@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2C6B4D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Piano para la Misa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Figtree:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: teclado fijo arriba (acorde actual + progresión), ajustes, y pestañas con el contenido del curso.
+   El color de acento sigue el color litúrgico: verde en Tiempo Ordinario, morado en Adviento. */
+:root{
+  --bg:#F3F6F5; --surface:#FFFFFF; --surface2:#E8EEEC; --fg:#16211C; --muted:#56655E; --line:#D2DCD8;
+  --accent:#2C6B4D; --accent-soft:#D6EADF; --on-accent:#FFFFFF;
+  --bass:#B4720B; --bass-soft:#F4E3BF; --on-bass:#FFFFFF; --blue:#3F6FD8; --green:#3E9B4F;
+  --key-w:#FFFFFF; --key-b:#17201C; --key-line:#B4C0BB;
+  --good:#23783F; --bad:#B03A2A;
+  --f-display:'Bricolage Grotesque',system-ui,sans-serif;
+  --f-body:'Figtree',system-ui,-apple-system,sans-serif;
+  --f-mono:'IBM Plex Mono',ui-monospace,Menlo,monospace;
+}
+:root[data-season="adviento"]{--accent:#68449A;--accent-soft:#E5DBF2}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1412; --surface:#17201C; --surface2:#212C27; --fg:#E6EEEA; --muted:#97A7A0; --line:#2D3A34;
+    --accent:#7DCBA2; --accent-soft:#1E3B2E; --on-accent:#08130E;
+    --bass:#E5B24C; --bass-soft:#3A2D10; --on-bass:#1B1303; --blue:#86A9FF; --green:#8ED16B;
+    --key-w:#E8EEEB; --key-b:#080C0A; --key-line:#4B5853; --good:#6CCB8C; --bad:#F29080; color-scheme:dark}
+  :root:not([data-theme="light"])[data-season="adviento"]{--accent:#C0A4EC;--accent-soft:#2E2347}
+}
+:root[data-theme="dark"]{
+  --bg:#0E1412; --surface:#17201C; --surface2:#212C27; --fg:#E6EEEA; --muted:#97A7A0; --line:#2D3A34;
+  --accent:#7DCBA2; --accent-soft:#1E3B2E; --on-accent:#08130E;
+  --bass:#E5B24C; --bass-soft:#3A2D10; --on-bass:#1B1303; --blue:#86A9FF; --green:#8ED16B;
+  --key-w:#E8EEEB; --key-b:#080C0A; --key-line:#4B5853; --good:#6CCB8C; --bad:#F29080; color-scheme:dark}
+:root[data-theme="dark"][data-season="adviento"]{--accent:#C0A4EC;--accent-soft:#2E2347}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:400 16px/1.5 var(--f-body);padding-inline:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px));padding-block:20px 64px}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:940px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(26px,5vw,38px);line-height:1.1}
+h2{font-size:22px;line-height:1.2}
+h3{font-size:18px}
+p{margin:0}
+button,select,textarea,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+.sub{color:var(--muted);margin-top:6px;max-width:46ch}
+.seg{display:inline-flex;background:var(--surface2);border-radius:10px;padding:3px;gap:2px;max-width:100%}
+.seg button{border:0;background:transparent;padding:7px 13px;border-radius:8px;font-weight:600;font-size:14px;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent)}
+
+/* Teclado fijo */
+.stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px 10px;display:grid;gap:8px;box-shadow:0 6px 18px -12px rgba(0,0,0,.35)}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.who{min-width:0}
+.eyebrow{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chordbig{font:600 30px/1.1 var(--f-mono);display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.chordbig small{font:500 14px var(--f-mono);color:var(--muted)}
+.ctl{display:flex;gap:6px;flex:none}
+.ib{width:42px;height:42px;border-radius:50%;border:1px solid var(--line);background:var(--surface2);display:grid;place-items:center;padding:0}
+.ib svg{width:18px;height:18px;fill:currentColor}
+.ib.play{background:var(--accent);border-color:var(--accent);color:var(--on-accent);width:48px;height:48px}
+.pchips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.pchip{flex:none;font:600 13px var(--f-mono);padding:4px 11px;border-radius:999px;border:1px solid var(--line);background:var(--surface2)}
+.pchip[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.kbscroll{overflow-x:auto}
+.kb{position:relative;height:96px;min-width:340px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.wk,.bk{position:absolute;cursor:pointer}
+.wk{top:0;bottom:0;background:var(--key-w);border:1px solid var(--key-line);border-radius:0 0 6px 6px}
+.bk{top:0;height:60%;background:var(--key-b);border-radius:0 0 4px 4px;z-index:2;border:1px solid var(--key-b)}
+.lb{position:absolute;left:0;right:0;bottom:17px;text-align:center;font:600 11px var(--f-mono);pointer-events:none}
+.bk .lb{bottom:5px;color:#fff;font-size:10px}
+.oct{position:absolute;left:0;right:0;bottom:3px;text-align:center;font:500 9px var(--f-mono);color:var(--muted);font-style:normal;pointer-events:none}
+.rh{background:var(--accent)!important;border-color:var(--accent)!important;color:var(--on-accent)}
+.lh{background:var(--bass)!important;border-color:var(--bass)!important;color:var(--on-bass)}
+.bk.rh .lb{color:var(--on-accent)}.bk.lh .lb{color:var(--on-bass)}
+.sel{background:var(--accent-soft)!important;border-color:var(--accent)!important;box-shadow:inset 0 0 0 2px var(--accent)}
+.ans{background:var(--bass)!important;border-color:var(--bass)!important;color:var(--on-bass)}
+.rb{background:var(--blue)!important;border-color:var(--blue)!important;color:var(--on-accent)}
+.lg{background:var(--green)!important;border-color:var(--green)!important;color:var(--on-accent)}
+.bk.rb .lb,.bk.lg .lb{color:var(--on-accent)}
+.rollbox{min-width:340px}
+.rollbox canvas{display:block;width:100%;height:270px;border-radius:10px 10px 0 0;background:var(--surface2)}
+.rollstat{font:600 15px var(--f-mono);min-height:24px}
+.chk{display:flex;align-items:center;gap:8px;font-size:14px}
+.legendr{display:flex;gap:14px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.dot.b{background:var(--blue)}.dot.g{background:var(--green)}
+.bk.sel .lb{color:var(--fg)}
+.cinfo{font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px 14px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.dot.r{background:var(--accent)}.dot.l{background:var(--bass)}
+@media (max-height:560px){.stage{position:static}}
+.rolling .stage{position:static}
+.stage{grid-template-columns:minmax(0,1fr)}.srow{min-width:0}
+
+/* Ajustes */
+.settings{margin-top:14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px 14px;align-items:end}
+.fld{display:grid;gap:4px;min-width:0}
+.fld>label,.fld>span{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+select,textarea,input[type="text"]{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+input[type="range"]{width:100%;accent-color:var(--accent)}
+
+/* Pestañas */
+.tabs{display:flex;gap:4px;overflow-x:auto;margin-top:22px;border-bottom:1px solid var(--line)}
+.tabs a{flex:none;text-decoration:none;color:var(--muted);font-weight:600;padding:10px 14px;border-bottom:3px solid transparent;margin-bottom:-1px}
+.tabs a[aria-current="page"]{color:var(--fg);border-bottom-color:var(--accent)}
+.panel{padding-top:22px;display:grid;gap:18px}
+.panel[hidden]{display:none}
+.lead{color:var(--muted);max-width:68ch}
+
+.season{background:var(--accent-soft);border-radius:12px;padding:14px 16px;display:grid;gap:4px}
+.season b{font-family:var(--f-display)}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:10px;min-width:0}
+.card .fn{color:var(--muted);font-size:15px}
+.tip{font-size:15px}
+.note{background:var(--bass-soft);border-radius:10px;padding:10px 12px;font-size:15px}
+.meta{font-size:13px;color:var(--muted)}
+.progs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.prog{text-align:left;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:10px 12px;display:grid;gap:3px;min-width:0}
+.prog[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
+.pn{font-weight:600}.pn em{font-style:normal;font-weight:500;color:var(--muted);font-size:13px;margin-left:4px}
+.pc{font:600 15px var(--f-mono);overflow-wrap:anywhere}
+.pr{font:500 12px var(--f-mono);color:var(--muted)}
+
+.grid7{display:grid;gap:8px}
+.row7{display:grid;grid-template-columns:44px 84px 1fr;gap:4px 12px;align-items:center;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;width:100%}
+.row7[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.row7 .num{font:600 15px var(--f-mono);color:var(--accent)}
+.row7 .nm{font:600 18px var(--f-mono)}
+.row7 .nt{font:500 14px var(--f-mono);color:var(--muted)}
+.row7 .rl{grid-column:2/-1;font-size:14px;color:var(--muted)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+ul.tight{margin:0;padding-left:18px;display:grid;gap:6px}
+.btn{border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:8px 14px;font-weight:600}
+.btn.pri{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+.pat{overflow-x:auto}
+.pgrid{display:grid;gap:3px;min-width:420px}
+.pgrid .c{height:30px;border-radius:6px;background:var(--surface2);display:grid;place-items:center;font:600 12px var(--f-mono)}
+.pgrid .h{height:auto;background:none;color:var(--muted);font-weight:500}
+.pgrid .B{background:var(--bass);color:var(--on-bass)}
+.pgrid .C{background:var(--accent);color:var(--on-accent)}
+.pgrid .A{background:var(--accent-soft);color:var(--fg);box-shadow:inset 0 0 0 1px var(--accent)}
+.pgrid .lab{display:none}
+
+.songchips{display:grid;gap:8px}
+.songline{display:flex;flex-wrap:wrap;gap:6px}
+.sch{font:600 15px var(--f-mono);padding:6px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface2)}
+.sch[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--on-accent)}
+.sch.bad{border-color:var(--bad);color:var(--bad);background:transparent}
+textarea{font:500 17px/1.6 var(--f-mono);min-height:112px;resize:vertical}
+.quiz{display:grid;gap:12px}
+.qtarget{font:600 34px var(--f-mono)}
+.msg{min-height:24px;font-weight:600}
+.msg.ok{color:var(--good)}.msg.no{color:var(--bad)}
+.hide-narrow{display:inline}
+.partgroup{display:grid;gap:12px}
+.partgroup>h2{font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);padding-top:6px}
+.shead{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px}
+.snum{font:600 15px var(--f-mono);color:var(--on-accent);background:var(--accent);border-radius:8px;padding:2px 9px}
+.badge{font-size:12px;font-weight:600;border-radius:999px;padding:2px 10px;border:1px solid var(--line)}
+.badge.ok{background:var(--accent-soft);border-color:var(--accent)}
+.badge.mid{background:var(--bass-soft);border-color:var(--bass)}
+.badge.hard{border-color:var(--bad);color:var(--bad)}
+.sline{display:grid;gap:5px;padding:8px 0;border-top:1px solid var(--line)}
+.sline:first-of-type{border-top:0}
+.cue{font-size:13px;color:var(--muted)}
+.ucs{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;padding-top:8px}
+.uc{text-align:left;background:var(--surface2);border:1px solid var(--line);border-radius:10px;padding:8px 10px;display:grid;gap:2px;min-width:0}
+.uc b{font:600 16px var(--f-mono)}.uc span{font:500 12px var(--f-mono);color:var(--muted)}
+summary{cursor:pointer;font-weight:600}
+ol.tight{margin:0;padding-left:20px;display:grid;gap:4px}
+@media (max-width:520px){.chordbig{font-size:26px}.kb{height:88px}.row7{grid-template-columns:36px 74px 1fr}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>Piano para la Misa</h1>
+      <p class="sub">Qué teclas tocar en cada parte de la celebración. Teclado organeta, nivel medio, acordes en cifrado.</p>
+    </div>
+    <div class="btnrow"><button type="button" class="btn" id="btnInstall" hidden>Instalar app</button>
+    <div class="seg" role="group" aria-label="Tiempo litúrgico">
+      <button type="button" data-season="ordinario" aria-pressed="true">Tiempo Ordinario</button>
+      <button type="button" data-season="adviento" aria-pressed="false">Adviento</button>
+    </div></div>
+  </header>
+
+  <section class="stage" aria-label="Teclado y acorde actual">
+    <div class="srow">
+      <div class="who">
+        <div class="eyebrow" id="cLabel">&nbsp;</div>
+        <div class="chordbig"><span id="cName">–</span><small id="cAlt"></small></div>
+      </div>
+      <div class="ctl">
+        <button type="button" class="ib" id="bPrev" aria-label="Acorde anterior"><svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9 12z"/></svg></button>
+        <button type="button" class="ib play" id="bPlay" aria-label="Escuchar progresión"><svg viewBox="0 0 24 24" id="icoPlay"><path d="M7 4v16l13-8z"/></svg></button>
+        <button type="button" class="ib" id="bNext" aria-label="Acorde siguiente"><svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5l11 7L4 19z"/></svg></button>
+      </div>
+    </div>
+    <div class="pchips" id="pchips" aria-label="Progresión"></div>
+    <div class="kbscroll"><div id="kb" aria-label="Teclado de piano"></div></div>
+    <div class="cinfo" id="cInfo"></div>
+  </section>
+
+  <section class="settings" aria-label="Ajustes">
+    <div class="fld"><label for="selTonic">Tonalidad</label><select id="selTonic"></select></div>
+    <div class="fld"><span>Notas</span>
+      <div class="seg" role="group" aria-label="Nombres de las notas">
+        <button type="button" data-names="abc" aria-pressed="true">C D E</button>
+        <button type="button" data-names="latin" aria-pressed="false">Do Re Mi</button>
+      </div></div>
+    <div class="fld"><label for="selHands">Manos</label>
+      <select id="selHands">
+        <option value="dos">Derecha acorde, izquierda bajo</option>
+        <option value="izq">Izquierda acorde, derecha melodía</option>
+      </select></div>
+    <div class="fld"><label for="selVoice">Posición del acorde</label>
+      <select id="selVoice">
+        <option value="cerca">Cercana (suave)</option>
+        <option value="fund">Fundamental (siempre igual)</option>
+      </select></div>
+    <div class="fld"><label for="selStyle">Ritmo al escuchar</label><select id="selStyle"></select></div>
+    <div class="fld"><label for="rngBpm">Tempo <b id="bpmOut">100</b> bpm</label><input type="range" id="rngBpm" min="50" max="132" value="100"></div>
+  </section>
+
+  <nav class="tabs" aria-label="Secciones">
+    <a href="#cantos" data-tab="cantos">Mis cantos</a>
+    <a href="#misa" data-tab="misa">La Misa</a>
+    <a href="#acordes" data-tab="acordes">Acordes</a>
+    <a href="#ritmos" data-tab="ritmos">Ritmos</a>
+    <a href="#cancion" data-tab="cancion">Mi canción</a>
+    <a href="#practica" data-tab="practica">Práctica</a>
+  </nav>
+
+  <main>
+    <!-- MIS CANTOS -->
+    <section class="panel" id="p-cantos">
+      <div class="season"><b>Repertorio · Misa de Adviento</b><span>Acordes tomados del cantoral “Cantemos al Dios de la vida” (5.ª edición). Pulsa un acorde para ver sus teclas arriba. “Tocar canto” los reproduce en orden, un compás cada uno, solo como guía de armonía. En Adviento no se canta el Gloria, por eso no aparece.</span></div>
+      <div class="card"><h3>Orden de práctica, de más fácil a más difícil</h3>
+        <ol class="tight"><li>248 Cristo está conmigo</li><li>173 Santo es el Señor</li><li>75 Señor, ten piedad</li><li>251 No me habéis vosotros elegido</li><li>266 Si yo no tengo amor</li><li>252 Danos un corazón</li><li>125 Buscad primero</li><li>267 Tú reinarás</li><li>199 Cordero de Dios</li></ol></div>
+      <div class="card" id="rollCard" hidden>
+        <div class="btnrow" style="justify-content:space-between"><h3 id="rollTitle">Notas que caen</h3><button type="button" class="btn" id="rollClose">Cerrar</button></div>
+        <div class="legendr"><span><i class="dot g"></i>Mano izquierda: acordes</span><span><i class="dot b"></i>Mano derecha</span></div>
+        <div class="settings" style="margin:0">
+          <div class="fld"><label for="rMode">Modo</label><select id="rMode"><option value="auto">Automático</option><option value="wait">Esperar mi toque</option></select></div>
+          <div class="fld"><label for="rSpeed">Velocidad</label><select id="rSpeed"><option value="0.5">Lenta (50%)</option><option value="0.75" selected>Media (75%)</option><option value="1">Normal (100%)</option><option value="1.25">Rápida (125%)</option><option value="1.5">Muy rápida (150%)</option></select></div>
+          <div class="fld"><label for="rHands">Manos</label><select id="rHands"><option value="both">Las dos</option><option value="L">Solo izquierda</option><option value="R">Solo derecha</option></select></div>
+          <div class="fld"><label for="rSound">Sonido</label><select id="rSound"><option value="all">Melodía y acordes</option><option value="mel">Solo melodía (azul)</option><option value="chords">Solo acordes (verde)</option><option value="none">Sin sonido, solo ver</option></select></div>
+        </div>
+        <div class="btnrow">
+          <button type="button" class="btn pri" id="rPlay">Reproducir</button>
+          <button type="button" class="btn" id="rNext" hidden>Siguiente (Espacio)</button>
+          <button type="button" class="btn" id="rReset">Reiniciar</button>
+        </div>
+        <div class="rollstat" id="rStat"></div>
+        <div class="kbscroll"><div class="rollbox"><canvas id="rollCv" aria-label="Notas que caen"></canvas><div id="kbR"></div></div></div>
+        <details><summary>Melodía de la mano derecha</summary>
+          <p class="meta" style="margin:8px 0">Aún no tengo la melodía de este canto: el cantoral solo trae acordes. Mientras tanto, la derecha muestra el acorde. Si quieres, escribe la melodía con nota y octava, y la duración en tiempos después de la barra. Ejemplo: <b>Mi4/1 Sol4/1 Do5/2 -/1</b> (el guion es un silencio). Do4 es el Do central. Escríbela en el tono original; se transpone sola.</p>
+          <div class="fld"><label for="melTxt">Melodía</label><textarea id="melTxt" spellcheck="false" placeholder="Mi4/1 Sol4/1 Do5/2"></textarea></div>
+          <div class="btnrow" style="margin-top:8px"><button type="button" class="btn" id="melUse">Usar esta melodía</button><button type="button" class="btn" id="melClear">Quitar melodía</button><span class="meta" id="melMsg"></span></div>
+        </details>
+        <label class="chk"><input type="checkbox" id="rGuide" checked>Mostrar el acorde en la derecha si no hay melodía</label>
+        <p class="meta">La página no oye tu teclado. En “Esperar mi toque” avanza cuando pulsas las teclas en pantalla o cuando tocas “Siguiente” o la barra espaciadora.</p>
+      </div>
+      <div id="cantosList" class="panel" style="padding-top:0"></div>
+    </section>
+
+    <!-- LA MISA -->
+    <section class="panel" id="p-misa" hidden>
+      <div class="season" id="seasonBox"></div>
+      <p class="lead">Elige una progresión y mira en el teclado de arriba qué teclas tocar. Cambia la tonalidad según la voz del coro o del cantor. Las progresiones están escritas en grados y se convierten solas a la tonalidad que elijas.</p>
+      <div id="misaList" class="panel" style="padding-top:0"></div>
+    </section>
+
+    <!-- ACORDES -->
+    <section class="panel" id="p-acordes" hidden>
+      <div class="card">
+        <div class="btnrow" style="justify-content:space-between">
+          <h2 id="campoTitle">Acordes de la tonalidad</h2>
+          <div class="seg" role="group" aria-label="Modo">
+            <button type="button" data-mode="mayor" aria-pressed="true">Mayor</button>
+            <button type="button" data-mode="menor" aria-pressed="false">Menor</button>
+          </div>
+        </div>
+        <p class="lead">Casi todas las canciones usan solo estos siete acordes. Si sabes en qué tonalidad está la canción, ya sabes qué acordes pueden aparecer.</p>
+        <div class="grid7" id="campo"></div>
+        <div class="btnrow"><button type="button" class="btn pri" id="campoPlay">Escuchar los siete</button></div>
+      </div>
+      <div class="two">
+        <div class="card">
+          <h3>Buscador de acordes</h3>
+          <div class="settings" style="margin:0">
+            <div class="fld"><label for="finderRoot">Nota</label><select id="finderRoot"></select></div>
+            <div class="fld"><label for="finderQ">Tipo</label>
+              <select id="finderQ">
+                <option value="">Mayor</option><option value="m">menor</option><option value="7">Séptima (7)</option>
+                <option value="maj7">Mayor 7 (maj7)</option><option value="m7">menor 7 (m7)</option>
+                <option value="sus4">sus4</option><option value="sus2">sus2</option><option value="dim">disminuido (dim)</option>
+                <option value="aug">aumentado (aug)</option><option value="6">Sexta (6)</option><option value="add9">add9</option>
+              </select></div>
+          </div>
+          <p class="meta">Se muestra arriba en el teclado.</p>
+        </div>
+        <div class="card">
+          <h3>Cómo saber la tonalidad</h3>
+          <ul class="tight">
+            <li>El último acorde de la canción casi siempre es la tónica (el grado I).</li>
+            <li>Si empieza y termina en un acorde menor, la tonalidad es menor (por ejemplo Am).</li>
+            <li>Cada tonalidad mayor comparte acordes con su relativa menor: C mayor y Am usan los mismos siete.</li>
+            <li>Los tres más usados son I, IV y V. El vi aparece mucho en cantos de comunión y ofertorio.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- RITMOS -->
+    <section class="panel" id="p-ritmos" hidden>
+      <p class="lead">Un mismo acorde suena distinto según el ritmo. B es el bajo (mano izquierda), A el acorde (mano derecha) y la fila de abajo cuenta el compás. Pulsa “Escuchar” para oírlo con la progresión que tengas cargada.</p>
+      <div id="ritmoList" class="panel" style="padding-top:0"></div>
+      <div class="two">
+        <div class="card">
+          <h3>Con acompañamiento automático</h3>
+          <ul class="tight">
+            <li><b>Dedo único (Single Finger):</b> en muchos modelos una tecla da el acorde mayor; la tecla más una negra a su izquierda da el menor; más una blanca a su izquierda da la séptima. Cambia según la marca, revisa tu manual.</li>
+            <li><b>Acorde completo (Fingered):</b> tocas las tres notas con la izquierda, como aparecen aquí con “Acorde con la izquierda”.</li>
+            <li>Evita el ritmo de fábrica con batería fuerte en Salmo, Cordero de Dios y Comunión. Usa uno suave o solo acordes.</li>
+          </ul>
+        </div>
+        <div class="card">
+          <h3>Qué ritmo de fábrica elegir</h3>
+          <ul class="tight">
+            <li>Entrada, Gloria, Aleluya y Final: 8 Beat, Pop o similar, 100 a 112 bpm.</li>
+            <li>Santo y Ofertorio: Ballad suave, 76 a 96 bpm.</li>
+            <li>Salmo, Cordero y Comunión: Slow o sin ritmo, 64 a 76 bpm.</li>
+            <li>Cantos en 3/4 o 6/8: Waltz o 6/8 Ballad.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- MI CANCIÓN -->
+    <section class="panel" id="p-cancion" hidden>
+      <div class="card">
+        <h2>Mi canción</h2>
+        <p class="lead">Escribe los acordes de tu canción tal como vienen en el cancionero, separados por espacios. Cada línea nueva es un renglón. Acepta C, Am, G7, Dsus4, F/A, Do, Lam, Sib y similares.</p>
+        <div class="fld"><label for="songTxt">Acordes</label>
+          <textarea id="songTxt" spellcheck="false">G D Em C
+G D C D
+Em C G D G</textarea></div>
+        <div class="btnrow">
+          <button type="button" class="btn" id="tDown">− ½ tono</button>
+          <button type="button" class="btn" id="tUp">+ ½ tono</button>
+          <button type="button" class="btn" id="tReset">Sin transponer</button>
+          <span class="meta" id="tInfo"></span>
+        </div>
+        <p class="meta" id="songKey"></p>
+        <div class="songchips" id="songChips"></div>
+        <div class="btnrow"><button type="button" class="btn pri" id="songPlay">Escuchar todos los acordes</button></div>
+        <p class="meta">Las canciones de tu repertorio quedan aquí solo mientras tengas la página abierta.</p>
+      </div>
+    </section>
+
+    <!-- PRÁCTICA -->
+    <section class="panel" id="p-practica" hidden>
+      <div class="card quiz">
+        <div class="btnrow" style="justify-content:space-between">
+          <h2>Toca el acorde</h2>
+          <div class="fld" style="min-width:200px"><label for="qLevel">Nivel</label>
+            <select id="qLevel">
+              <option value="1">1. I, IV y V</option>
+              <option value="2">2. Todos los acordes de la tonalidad</option>
+              <option value="3">3. Con séptimas</option>
+            </select></div>
+        </div>
+        <div><span class="meta" id="qKey"></span><div class="qtarget" id="qTarget">–</div></div>
+        <div class="kbscroll"><div id="kbQ"></div></div>
+        <div class="msg" id="qMsg"></div>
+        <div class="btnrow">
+          <button type="button" class="btn pri" id="qCheck">Revisar</button>
+          <button type="button" class="btn" id="qShow">Ver respuesta</button>
+          <button type="button" class="btn" id="qNext">Otro acorde</button>
+          <span class="meta" id="qScore">0 de 0 acertados</span>
+        </div>
+        <p class="meta">Toca las teclas en el teclado. Cuenta el nombre de la nota, no la octava: cualquier octava vale.</p>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(function(){
+'use strict';
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+
+/* ---------- Teoría ---------- */
+const FL=['C','D♭','D','E♭','E','F','G♭','G','A♭','A','B♭','B'];
+const SH=['C','C♯','D','D♯','E','F','F♯','G','G♯','A','A♯','B'];
+const LFL=['Do','Re♭','Re','Mi♭','Mi','Fa','Sol♭','Sol','La♭','La','Si♭','Si'];
+const LSH=['Do','Do♯','Re','Re♯','Mi','Fa','Fa♯','Sol','Sol♯','La','La♯','Si'];
+const KEYPC=[0,1,2,3,4,5,6,7,8,9,10,11];
+const KEYFL=[false,true,false,true,false,true,false,false,true,false,true,false];
+const Q={'':[0,4,7],'m':[0,3,7],'7':[0,4,7,10],'maj7':[0,4,7,11],'m7':[0,3,7,10],'sus4':[0,5,7],'sus2':[0,2,7],'dim':[0,3,6],'aug':[0,4,8],'6':[0,4,7,9],'m6':[0,3,7,9],'add9':[0,4,7,14],'m7b5':[0,3,6,10],'7sus4':[0,5,7,10],'5':[0,7]};
+const RN={I:0,II:2,III:4,IV:5,V:7,VI:9,VII:11};
+
+const S={season:'ordinario',tonic:0,latin:false,hands:'dos',voice:'cerca',style:'alegre',bpm:100,
+  chords:[],shapes:[],idx:0,label:'',cur:{src:'misa',m:'entrada',p:0},campoMinor:false};
+
+function nn(pc,flats){return (S.latin?(flats?LFL:LSH):(flats?FL:SH))[((pc%12)+12)%12];}
+function flatPref(root,minor){const maj=minor?(root+3)%12:root;return [5,10,3,8,1].includes(maj);}
+function mkChord(root,q,bass,flats){return {root,q,bass:bass==null?root:bass,flats,pcs:Q[q].map(x=>(root+x)%12)};}
+function cname(c){return nn(c.root,c.flats)+c.q+(c.bass!==c.root?'/'+nn(c.bass,c.flats):'');}
+function altname(c){S.latin=!S.latin;const r=cname(c);S.latin=!S.latin;return r;}
+function notesOf(c){return c.pcs.map(p=>nn(p,c.flats)).join(' – ');}
+function pretty(t){return t.replace(/^b/,'♭');}
+function keyLabel(pc,minor){return nn(pc,KEYFL[pc])+(minor?' menor':' mayor');}
+
+function fromNumerals(str,tonic,minor){
+  const flats=flatPref(tonic,minor);
+  return str.split(' ').map(tok=>{
+    const m=/^([b#]?)(vii|vi|iv|v|iii|ii|i)(.*)$/i.exec(tok);
+    const up=m[2]===m[2].toUpperCase();
+    const semi=RN[m[2].toUpperCase()]+(m[1]==='b'?-1:m[1]==='#'?1:0);
+    const q=(m[3]==='dim'||m[3]==='°')?'dim':(up?'':'m')+m[3];
+    return mkChord((tonic+semi+12)%12,q,null,flats);
+  });
+}
+
+/* Posición de las manos */
+function lowestAtOrAbove(pc,m){while(((m%12)+12)%12!==pc)m++;return m;}
+function voice(c,prev,ho){
+  const izq=(ho||S.hands)==='izq';
+  const lowMin=izq?48:58, topMax=izq?67:76;
+  const P=c.pcs, n=P.length, cands=[];
+  for(let r=0;r<n;r++){
+    const rot=P.slice(r).concat(P.slice(0,r));
+    const arr=[lowestAtOrAbove(rot[0],lowMin)];
+    for(let k=1;k<n;k++)arr.push(lowestAtOrAbove(rot[k],arr[k-1]+1));
+    if(arr[n-1]>topMax&&arr[0]-12>=48)for(let k=0;k<n;k++)arr[k]-=12;
+    cands.push(arr);
+  }
+  let pick=cands[0];
+  if(prev&&S.voice==='cerca'){
+    const mean=a=>a.reduce((x,y)=>x+y,0)/a.length, pm=mean(prev);
+    let best=1e9;
+    cands.forEach(a=>{const cost=Math.abs(mean(a)-pm)*a.length+Math.abs(a[0]-prev[0])*.5;if(cost<best){best=cost;pick=a;}});
+  }
+  const bassLow=lowestAtOrAbove(c.bass,36);
+  const lh=izq?null:lowestAtOrAbove(c.bass,48);
+  return {notes:pick,lh,bassA:bassLow,c};
+}
+function shapesFor(chords){const out=[];let prev=null;chords.forEach(c=>{const s=voice(c,prev);out.push(s);prev=s.notes;});return out;}
+
+/* ---------- Teclado ---------- */
+function Keyboard(host,opts){
+  const lo=48,hi=76,isB=m=>[1,3,6,8,10].includes(m%12);
+  const whites=[];for(let m=lo;m<=hi;m++)if(!isB(m))whites.push(m);
+  const W=100/whites.length, els=new Map();
+  host.classList.add('kb');host.innerHTML='';
+  whites.forEach((m,i)=>{
+    const d=document.createElement('div');d.className='wk';d.dataset.m=m;
+    d.style.left=(i*W)+'%';d.style.width=W+'%';
+    d.innerHTML='<span class="lb"></span>'+(m%12===0?'<i class="oct">C'+(Math.floor(m/12)-1)+'</i>':'');
+    host.appendChild(d);els.set(m,d);
+  });
+  for(let m=lo;m<=hi;m++)if(isB(m)){
+    const wi=whites.indexOf(m-1),d=document.createElement('div');
+    d.className='bk';d.dataset.m=m;d.style.left=((wi+1)*W-W*.31)+'%';d.style.width=(W*.62)+'%';
+    d.innerHTML='<span class="lb"></span>';host.appendChild(d);els.set(m,d);
+  }
+  host.addEventListener('pointerdown',e=>{
+    const k=e.target.closest('[data-m]');
+    if(k&&opts.onKey){e.preventDefault();opts.onKey(+k.dataset.m);}
+  });
+  return {show(map,flats){
+    els.forEach((d,m)=>{
+      d.classList.remove('rh','lh','sel','ans','rb','lg');
+      const lb=d.querySelector('.lb'),c=map.get(m);
+      if(c){d.classList.add(c);lb.textContent=nn(m%12,flats);}else lb.textContent='';
+    });
+  }};
+}
+
+/* ---------- Audio ---------- */
+let ctx=null,master=null,wave=null,bus=null;
+function audio(){
+  if(!ctx){
+    const AC=window.AudioContext||window.webkitAudioContext;if(!AC)return null;
+    ctx=new AC();master=ctx.createGain();master.gain.value=.4;
+    const comp=ctx.createDynamicsCompressor();master.connect(comp);comp.connect(ctx.destination);
+    const re=new Float32Array([0,1,.5,.33,.2,.12,.07,.04]);
+    wave=ctx.createPeriodicWave(re,new Float32Array(re.length));
+  }
+  if(ctx.state==='suspended')ctx.resume();
+  return ctx;
+}
+function tone(midi,t,dur,vel,dest){
+  const o=ctx.createOscillator();o.setPeriodicWave(wave);
+  o.frequency.value=440*Math.pow(2,(midi-69)/12);
+  const g=ctx.createGain(),a=.012;
+  g.gain.setValueAtTime(.0001,t);
+  g.gain.exponentialRampToValueAtTime(vel,t+a);
+  g.gain.setValueAtTime(vel,t+Math.max(a,dur-.08));
+  g.gain.exponentialRampToValueAtTime(.0001,t+dur+.12);
+  o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.16);
+}
+function clickNote(m){try{if(!audio())return;tone(m,ctx.currentTime,.7,.35,master);}catch(e){}}
+function chordNow(sh){
+  try{if(!audio())return;const t=ctx.currentTime,v=.3/Math.sqrt(sh.notes.length);
+    sh.notes.forEach(m=>tone(m,t,1.1,v,master));tone(sh.bassA,t,1.1,.3,master);}catch(e){}
+}
+
+/* ---------- Ritmos ---------- */
+const STYLES={
+  bloque:{n:'Acordes sostenidos',steps:8,beats:4,d:'Todo el compás sostenido. Es lo más seguro para Salmo, Señor ten piedad y momentos suaves.',ev:[['B',0,8],['C',0,8]]},
+  balada:{n:'Balada 4/4',steps:8,beats:4,d:'Bajo en 1 y 3, acorde en 2 y 4. Firme y tranquilo, ideal para Santo y Entrada sobria.',ev:[['B',0,3],['C',2,2],['F',4,3],['C',6,2]]},
+  alegre:{n:'Alegre 4/4',steps:8,beats:4,d:'Bajo en 1 y 3, acorde en el “y” de cada tiempo. Da energía a Gloria, Aleluya y Final.',ev:[['B',0,2],['C',2,1],['C',3,1],['F',4,2],['C',6,1],['C',7,1]]},
+  vals:{n:'Vals 3/4',steps:6,beats:3,d:'Bajo en 1, acordes en 2 y 3. Para cantos en tres tiempos.',ev:[['B',0,2],['C',2,2],['C',4,2]]},
+  arpegio:{n:'Arpegio 4/4',steps:8,beats:4,d:'Bajo largo y notas del acorde una por una. Ofertorio, Cordero de Dios y Comunión.',ev:[['B',0,8],['a0',1,2],['a1',2,2],['a2',3,2],['a1',4,2],['a2',5,2],['a1',6,2],['a2',7,1]]}
+};
+const P={on:false,i:0,step:0,next:0,timer:null,ui:[]};
+function playEv(e,sh,t,dur){
+  const k=e[0],n=sh.notes.length,v=.3/Math.sqrt(n);
+  if(k==='B')tone(sh.bassA,t,dur,.34,bus);
+  else if(k==='F')tone(sh.bassA+7,t,dur,.26,bus);
+  else if(k==='C')sh.notes.forEach(m=>tone(m,t,dur*.92,v,bus));
+  else tone(sh.notes[+k[1]%n],t,dur,.3,bus);
+}
+function sched(){
+  const secStep=30/S.bpm;
+  while(P.next<ctx.currentTime+.15){
+    const st=STYLES[S.style];
+    if(P.step>=st.steps)P.step=0;
+    if(P.step===0){
+      const idx=P.i,delay=Math.max(0,(P.next-ctx.currentTime)*1000);
+      P.ui.push(setTimeout(()=>{if(P.on)selectIdx(idx);},delay));
+    }
+    const sh=S.shapes[P.i];
+    if(sh)st.ev.forEach(e=>{if(e[1]===P.step)playEv(e,sh,P.next,e[2]*secStep);});
+    P.next+=secStep;P.step++;
+    if(P.step>=st.steps){P.step=0;P.i=(P.i+1)%S.chords.length;}
+  }
+}
+function stop(){
+  if(P.timer)clearInterval(P.timer);P.timer=null;
+  P.ui.forEach(clearTimeout);P.ui=[];
+  if(P.on&&bus){const b=bus;b.gain.setTargetAtTime(0,ctx.currentTime,.03);setTimeout(()=>{try{b.disconnect();}catch(e){}},400);}
+  P.on=false;setPlayIcon();
+}
+function start(){
+  if(!S.chords.length)return;
+  if(typeof R!=='undefined'&&R.on){R.on=false;cancelAnimationFrame(R.raf);rollSilence();$('#rPlay').textContent='Reanudar';}
+  try{if(!audio())return;}catch(e){return;}
+  stop();
+  bus=ctx.createGain();bus.gain.value=1;bus.connect(master);
+  P.on=true;P.i=S.idx;P.step=0;P.next=ctx.currentTime+.08;
+  sched();P.timer=setInterval(sched,25);setPlayIcon();
+}
+function setPlayIcon(){
+  $('#icoPlay').innerHTML=P.on?'<path d="M6 5h4v14H6zM14 5h4v14h-4z"/>':'<path d="M7 4v16l13-8z"/>';
+  $('#bPlay').setAttribute('aria-label',P.on?'Detener':'Escuchar progresión');
+}
+
+/* ---------- Estado y panel del teclado ---------- */
+const KB=Keyboard($('#kb'),{onKey:clickNote});
+function setChords(chords,label,idx){
+  stop();S.chords=chords;S.shapes=shapesFor(chords);S.idx=idx||0;S.label=label;renderStage();
+}
+function selectIdx(i){S.idx=(i+S.chords.length)%S.chords.length;renderStage();}
+function renderStage(){
+  const c=S.chords[S.idx],sh=S.shapes[S.idx];
+  $('#cLabel').textContent=S.label||'Elige un acorde';
+  if(!c){return;}
+  $('#cName').textContent=cname(c);
+  $('#cAlt').textContent=altname(c);
+  const map=new Map(),handCls=S.hands==='dos'?'rh':'lh';
+  sh.notes.forEach(m=>map.set(m,handCls));
+  if(sh.lh!=null)map.set(sh.lh,'lh');
+  KB.show(map,c.flats);
+  const rhTxt=sh.notes.map(m=>nn(m%12,c.flats)).join(' ');
+  $('#cInfo').innerHTML=S.hands==='dos'
+    ?`<span><i class="dot r"></i>Derecha: <b>${rhTxt}</b></span><span><i class="dot l"></i>Izquierda: <b>${nn(c.bass,c.flats)}</b></span>`
+    :`<span><i class="dot l"></i>Izquierda (acorde): <b>${rhTxt}</b></span>`;
+  $('#pchips').innerHTML=S.chords.map((x,i)=>`<button type="button" class="pchip" data-i="${i}" aria-current="${i===S.idx}">${cname(x)}</button>`).join('');
+  markCantos();
+  const cur=$('.pchip[aria-current="true"]');
+  if(cur&&cur.scrollIntoView&&$('#pchips').scrollWidth>$('#pchips').clientWidth){
+    const box=$('#pchips');box.scrollLeft=cur.offsetLeft-box.clientWidth/2+cur.clientWidth/2;
+  }
+}
+$('#pchips').addEventListener('click',e=>{
+  const b=e.target.closest('[data-i]');if(!b)return;
+  selectIdx(+b.dataset.i);chordNow(S.shapes[S.idx]);
+});
+$('#bPlay').onclick=()=>{P.on?stop():start();};
+$('#bPrev').onclick=()=>{selectIdx(S.idx-1);if(P.on)P.i=S.idx,P.step=0;};
+$('#bNext').onclick=()=>{selectIdx(S.idx+1);if(P.on)P.i=S.idx,P.step=0;};
+
+/* ---------- Contenido de la Misa ---------- */
+const MOM=[
+{id:'entrada',nombre:'Canto de entrada',fn:'Reúne a la asamblea y acompaña la procesión.',
+ ord:{tip:'Pulso firme y alegre. Toca una introducción de dos compases (grado I y V) para que la asamblea tome la nota y el tempo.',style:'alegre',bpm:104,
+  progs:[{n:'Festiva',m:'mayor',p:'I IV V I'},{n:'Popular',m:'mayor',p:'I V vi IV'}]},
+ adv:{tip:'Sobrio y esperanzado. En Adviento los instrumentos acompañan con moderación, sin adelantar la alegría plena de la Navidad.',style:'balada',bpm:84,
+  progs:[{n:'Espera',m:'menor',p:'i bVII bVI V'},{n:'Vigilia',m:'menor',p:'i iv bVII bIII'}]}},
+{id:'perdon',nombre:'Acto penitencial y Señor, ten piedad',fn:'Pide perdón y misericordia. Es breve y suplicante.',
+ ord:{tip:'Suave y sin adornos. Acordes sostenidos o arpegio lento, con el volumen bajo.',style:'bloque',bpm:66,
+  progs:[{n:'Súplica',m:'menor',p:'i iv V i'},{n:'Suave',m:'mayor',p:'I vi ii V'}]},
+ adv:{tip:'Aún más sobrio. Deja respirar los silencios entre las invocaciones.',style:'bloque',bpm:60,
+  progs:[{n:'Menor clásica',m:'menor',p:'i bVI iv V'},{n:'Menor modal',m:'menor',p:'i bVII i V'}]}},
+{id:'gloria',nombre:'Gloria',fn:'Himno de alabanza. Se canta los domingos fuera de Adviento y Cuaresma, y en solemnidades y fiestas.',
+ ord:{tip:'Festivo y rítmico. Mantén el pulso constante porque es un canto largo.',style:'alegre',bpm:112,
+  progs:[{n:'Alabanza',m:'mayor',p:'I IV V I'},{n:'Pop festivo',m:'mayor',p:'I vi IV V'}]},
+ adv:{tip:'Pasa directamente de las invocaciones (Señor, ten piedad) a la oración colecta.',
+  alert:'En los domingos de Adviento no se canta el Gloria. Sí se canta en las solemnidades y fiestas que caen en esos días, como la Inmaculada Concepción (8 de diciembre).',progs:null}},
+{id:'salmo',nombre:'Salmo responsorial',fn:'La asamblea repite la antífona y el salmista canta los versos.',
+ ord:{tip:'Acordes sostenidos y discretos. Da la nota de entrada de la antífona y deja el protagonismo al salmista.',style:'bloque',bpm:76,
+  progs:[{n:'Sencilla',m:'mayor',p:'I IV I V'},{n:'Cálida',m:'mayor',p:'vi IV I V'}]},
+ adv:{tip:'Acompañamiento mínimo. La antífona es corta, repítela las veces que haga falta con la misma armonía.',style:'bloque',bpm:72,
+  progs:[{n:'Sencilla',m:'menor',p:'i bVII i V'},{n:'Esperanza',m:'menor',p:'i bVI bVII i'}]}},
+{id:'aleluya',nombre:'Aleluya',fn:'Aclamación antes del Evangelio. La asamblea se pone de pie.',
+ ord:{tip:'Brillante y breve. Introducción corta y entrada clara.',style:'alegre',bpm:112,
+  progs:[{n:'Brillante',m:'mayor',p:'I IV V I'},{n:'Alegre',m:'mayor',p:'I V IV I'}]},
+ adv:{tip:'El Aleluya sí se canta en Adviento (en Cuaresma se omite). Mantén la claridad sin exceso de adornos.',style:'alegre',bpm:100,
+  progs:[{n:'Brillante',m:'mayor',p:'I IV V I'},{n:'Sencilla',m:'mayor',p:'I IV I V'}]}},
+{id:'ofertorio',nombre:'Presentación de las ofrendas',fn:'Acompaña la procesión de los dones. Puede ser canto o música instrumental.',
+ ord:{tip:'Meditativo, con arpegio suave. Si no hay canto, puedes tocar solo música instrumental.',style:'arpegio',bpm:76,
+  progs:[{n:'Recogida',m:'mayor',p:'I iii IV V'},{n:'Clásica',m:'mayor',p:'I vi IV V'}]},
+ adv:{tip:'Sobrio, con arpegios suaves y sin florituras.',style:'arpegio',bpm:72,
+  progs:[{n:'Espera',m:'menor',p:'i bVI bIII bVII'},{n:'Recogida',m:'menor',p:'i iv bVI V'}]}},
+{id:'santo',nombre:'Santo',fn:'Aclamación dentro de la plegaria eucarística.',
+ ord:{tip:'Solemne y firme, con pulso de marcha tranquila. Todos cantan.',style:'balada',bpm:96,
+  progs:[{n:'Solemne',m:'mayor',p:'I IV V I'},{n:'Amplia',m:'mayor',p:'I vi ii V'}]},
+ adv:{tip:'Solemne pero contenido. Acordes plenos y sin adornos.',style:'balada',bpm:84,
+  progs:[{n:'Menor solemne',m:'menor',p:'i bVII bVI V'},{n:'Plena',m:'menor',p:'i bVI iv V'}]}},
+{id:'cordero',nombre:'Cordero de Dios',fn:'Acompaña la fracción del pan y se repite mientras dure el rito.',
+ ord:{tip:'Suave y repetitivo. Alarga el último acorde en “danos la paz”. Si el rito se alarga, repite la frase.',style:'arpegio',bpm:68,
+  progs:[{n:'Plegaria',m:'mayor',p:'I vi IV V'},{n:'Suave',m:'mayor',p:'vi IV I V'}]},
+ adv:{tip:'Íntimo y sobrio. Mantén el mismo tempo en todas las repeticiones.',style:'arpegio',bpm:64,
+  progs:[{n:'Plegaria',m:'menor',p:'i bVI bIII bVII'},{n:'Sobria',m:'menor',p:'i iv i V'}]}},
+{id:'comunion',nombre:'Comunión',fn:'Acompaña la procesión y la meditación posterior.',
+ ord:{tip:'Recogido y continuo. Arpegios lentos; cuida que la asamblea pueda cantar sin prisa.',style:'arpegio',bpm:66,
+  progs:[{n:'Meditación',m:'mayor',p:'I vi ii V'},{n:'Cánon de ocho acordes',m:'mayor',p:'I V vi iii IV I IV V'}]},
+ adv:{tip:'Íntimo y esperanzado. Si hay silencio después de comulgar, cierra con un acorde largo y suave.',style:'arpegio',bpm:64,
+  progs:[{n:'Espera íntima',m:'menor',p:'i bVI iv V'},{n:'Luz creciente',m:'mayor',p:'I iii IV V'}]}},
+{id:'final',nombre:'Canto final',fn:'Cierra la celebración y envía a la comunidad.',
+ ord:{tip:'Alegre y enérgico; puedes subir un poco el tempo. Termina con un acorde final claro.',style:'alegre',bpm:108,
+  progs:[{n:'Envío festivo',m:'mayor',p:'I IV V I'},{n:'Popular',m:'mayor',p:'I V vi IV'}]},
+ adv:{tip:'Esperanza y alegría contenida. El tercer domingo (Gaudete, color rosa) admite un tono más luminoso.',style:'balada',bpm:92,
+  progs:[{n:'Esperanza',m:'menor',p:'i bVII bVI V'},{n:'Gaudete',m:'mayor',p:'I V vi IV'}]}}
+];
+const SEASON_TXT={
+  ordinario:'<b>Tiempo Ordinario · color verde</b><span>Domingos con Gloria y Credo. Tono de vida diaria y confianza. Estos son los cantos habituales de la mayoría del año.</span>',
+  adviento:'<b>Adviento · color morado</b><span>Cuatro semanas de espera. No hay Gloria en los domingos, el Aleluya sí se canta y los instrumentos se usan con sobriedad. Lo habitual es sonoridad menor y ritmos más calmados.</span>'
+};
+
+function renderMisa(){
+  $('#seasonBox').innerHTML=SEASON_TXT[S.season];
+  const key=S.season==='adviento'?'adv':'ord';
+  $('#misaList').innerHTML=MOM.map(mo=>{
+    const d=mo[key];
+    const body=d.progs?`<div class="progs">${d.progs.map((p,i)=>{
+      const ch=fromNumerals(p.p,S.tonic,p.m==='menor');
+      const on=S.cur.src==='misa'&&S.cur.m===mo.id&&S.cur.p===i;
+      return `<button type="button" class="prog" data-m="${mo.id}" data-p="${i}" aria-pressed="${on}">
+        <span class="pn">${p.n}<em>${keyLabel(S.tonic,p.m==='menor')}</em></span>
+        <span class="pc">${ch.map(cname).join(' · ')}</span>
+        <span class="pr">${p.p.split(' ').map(pretty).join(' – ')}</span></button>`;}).join('')}</div>`:'';
+    const meta=d.progs?`<p class="meta">Ritmo sugerido: ${STYLES[d.style].n} · ${d.bpm} bpm</p>`:'';
+    return `<article class="card"><header><h3>${mo.nombre}</h3><p class="fn">${mo.fn}</p></header>
+      <p class="tip">${d.tip}</p>${d.alert?`<p class="note">${d.alert}</p>`:''}${meta}${body}</article>`;
+  }).join('');
+}
+function loadProg(mId,pIdx){
+  const mo=MOM.find(x=>x.id===mId),d=mo[S.season==='adviento'?'adv':'ord'];
+  if(!d.progs){mId='entrada';pIdx=0;return loadProg(mId,pIdx);}
+  const p=d.progs[pIdx]||d.progs[0];
+  S.cur={src:'misa',m:mId,p:pIdx};
+  S.style=d.style;S.bpm=d.bpm;syncSettings();
+  const chords=fromNumerals(p.p,S.tonic,p.m==='menor');
+  setChords(chords,`${MOM.find(x=>x.id===mId).nombre} · ${p.n} · ${keyLabel(S.tonic,p.m==='menor')}`);
+  renderMisa();
+}
+$('#misaList').addEventListener('click',e=>{
+  const b=e.target.closest('.prog');if(!b)return;
+  loadProg(b.dataset.m,+b.dataset.p);chordNow(S.shapes[0]);
+});
+
+/* ---------- Acordes ---------- */
+const CAMPO_MAJ=[[0,'','I','Tónica: reposo, la “casa” de la canción'],[2,'m','ii','Subdominante: prepara al V'],[4,'m','iii','Tónica de apoyo, color suave'],[5,'','IV','Subdominante: se aleja de casa'],[7,'','V','Dominante: tensión, pide volver al I'],[9,'m','vi','Relativo menor: aparece mucho en comunión'],[11,'dim','vii°','Disminuido: tensión, poco usado']];
+const CAMPO_MIN=[[0,'m','i','Tónica: reposo en tono menor'],[2,'dim','ii°','Disminuido: poco usado en canto sencillo'],[3,'','♭III','Relativo mayor, da luz'],[5,'m','iv','Subdominante: se aleja de casa'],[7,'','V','Dominante: se usa mayor para que resuelva al i'],[8,'','♭VI','Color amplio, muy usado en Adviento'],[10,'','♭VII','Prepara el regreso a i o al V']];
+function campoChords(){
+  const minor=S.campoMinor,fl=flatPref(S.tonic,minor);
+  return (minor?CAMPO_MIN:CAMPO_MAJ).map(r=>mkChord((S.tonic+r[0])%12,r[1],null,fl));
+}
+function renderCampo(){
+  const minor=S.campoMinor,list=minor?CAMPO_MIN:CAMPO_MAJ,ch=campoChords();
+  $('#campoTitle').textContent='Acordes de '+keyLabel(S.tonic,minor);
+  $$('[data-mode]').forEach(b=>b.setAttribute('aria-pressed',String((b.dataset.mode==='menor')===minor)));
+  $('#campo').innerHTML=list.map((r,i)=>`<button type="button" class="row7" data-i="${i}" aria-current="${S.cur.src==='campo'&&S.idx===i}">
+    <span class="num">${r[2]}</span><span class="nm">${cname(ch[i])}</span><span class="nt">${notesOf(ch[i])}</span><span class="rl">${r[3]}</span></button>`).join('');
+}
+function loadCampo(idx){
+  S.cur={src:'campo'};
+  setChords(campoChords(),'Acordes de '+keyLabel(S.tonic,S.campoMinor),idx||0);
+  S.style='bloque';S.bpm=60;syncSettings();renderCampo();
+}
+$('#campo').addEventListener('click',e=>{
+  const b=e.target.closest('.row7');if(!b)return;
+  loadCampo(+b.dataset.i);chordNow(S.shapes[S.idx]);
+});
+$$('[data-mode]').forEach(b=>b.onclick=()=>{S.campoMinor=b.dataset.mode==='menor';loadCampo(0);});
+$('#campoPlay').onclick=()=>{loadCampo(0);start();};
+
+function buildSelects(){
+  const opts=KEYPC.map(pc=>`<option value="${pc}">${nn(pc,KEYFL[pc])}</option>`).join('');
+  $('#selTonic').innerHTML=opts;$('#selTonic').value=S.tonic;
+  const fr=$('#finderRoot'),old=fr.value;fr.innerHTML=opts;fr.value=old||'0';
+}
+function loadFinder(){
+  const r=+$('#finderRoot').value,q=$('#finderQ').value;
+  S.cur={src:'chord'};
+  setChords([mkChord(r,q,null,KEYFL[r])],'Buscador de acordes');
+  renderCampo();
+}
+$('#finderRoot').onchange=loadFinder;$('#finderQ').onchange=loadFinder;
+
+/* ---------- Ritmos ---------- */
+function renderRitmos(){
+  $('#ritmoList').innerHTML=Object.entries(STYLES).map(([id,st])=>{
+    const n=st.steps,names=['1','y','2','y','3','y','4','y'].slice(0,n);
+    const cells=[];
+    for(let s=0;s<n;s++){
+      const ev=st.ev.filter(e=>e[1]===s);
+      let cls='c',tx='';
+      if(ev.some(e=>e[0]==='B'||e[0]==='F')){cls+=' B';tx='B';}
+      if(ev.some(e=>e[0]==='C')){cls+=' C';tx=tx?'B+A':'A';}
+      else if(ev.some(e=>/^a/.test(e[0]))){cls+=' A';tx=tx||'a';}
+      cells.push(`<div class="${cls}">${tx}</div>`);
+    }
+    const hd=names.map(x=>`<div class="c h">${x}</div>`).join('');
+    return `<article class="card"><div class="btnrow" style="justify-content:space-between"><h3>${st.n}</h3>
+      <button type="button" class="btn pri" data-style="${id}">Escuchar</button></div>
+      <p class="tip">${st.d}</p>
+      <div class="pat"><div class="pgrid" style="grid-template-columns:repeat(${n},1fr)">${cells.join('')}${hd}</div></div></article>`;
+  }).join('')+`<p class="meta">B bajo con la mano izquierda · A acorde completo con la derecha · a una nota del acorde (arpegio).</p>`;
+}
+$('#ritmoList').addEventListener('click',e=>{
+  const b=e.target.closest('[data-style]');if(!b)return;
+  S.style=b.dataset.style;if(b.dataset.style==='vals'&&S.bpm>110)S.bpm=90;
+  syncSettings();start();
+});
+
+/* ---------- Mi canción ---------- */
+const LPC={do:0,re:2,mi:4,fa:5,sol:7,la:9,si:11},LET={c:0,d:2,e:4,f:5,g:7,a:9,b:11};
+const SUF={'':'','maj':'','M':'','m':'m','min':'m','-':'m','7':'7','maj7':'maj7','M7':'maj7','Δ':'maj7','Δ7':'maj7','m7':'m7','min7':'m7','-7':'m7','sus4':'sus4','sus':'sus4','sus2':'sus2','dim':'dim','°':'dim','aug':'aug','+':'aug','6':'6','m6':'m6','add9':'add9','m7b5':'m7b5','ø':'m7b5','7sus4':'7sus4','5':'5'};
+function parseRoot(s){
+  const t=s.replace(/♭/g,'b').replace(/♯/g,'#');
+  for(const re of [/^(sol|do|re|mi|fa|la|si)([#b]?)(.*)$/i,/^([a-g])([#b]?)(.*)$/i]){
+    const m=re.exec(t);if(!m)continue;
+    const nm=m[1].toLowerCase(),base=nm.length>1?LPC[nm]:LET[nm];
+    return {pc:(base+(m[2]==='#'?1:m[2]==='b'?-1:0)+12)%12,rest:m[3]};
+  }
+  return null;
+}
+function parseChord(tok){
+  const parts=tok.split('/'),t=tok.replace(/♭/g,'b').replace(/♯/g,'#');
+  const main=parts[0].replace(/♭/g,'b').replace(/♯/g,'#');
+  const attempts=[/^(sol|do|re|mi|fa|la|si)([#b]?)(.*)$/i,/^([a-g])([#b]?)(.*)$/i];
+  for(const re of attempts){
+    const m=re.exec(main);if(!m)continue;
+    const nm=m[1].toLowerCase(),base=nm.length>1?LPC[nm]:LET[nm];
+    const root=(base+(m[2]==='#'?1:m[2]==='b'?-1:0)+12)%12;
+    if(!(m[3] in SUF))continue;
+    let bass=root;
+    if(parts[1]){const b=parseRoot(parts[1].replace(/♭/g,'b').replace(/♯/g,'#'));if(!b||b.rest)return null;bass=b.pc;}
+    return {root,q:SUF[m[3]],bass};
+  }
+  return null;
+}
+const SONG={lines:[],trans:0,flat:false};
+function readSong(){
+  SONG.lines=$('#songTxt').value.split('\n').map(l=>l.split(/[\s|,]+/).filter(t=>t&&!/^[-/]+$/.test(t)).map(t=>({raw:t,c:parseChord(t)})));
+}
+function songChords(){
+  const out=[];
+  SONG.lines.forEach(l=>l.forEach(t=>{
+    if(t.c)out.push(mkChord((t.c.root+SONG.trans+120)%12,t.c.q,(t.c.bass+SONG.trans+120)%12,SONG.flat));
+  }));
+  return out;
+}
+function renderSong(){
+  readSong();
+  const valid=[].concat(...SONG.lines).filter(t=>t.c);
+  if(valid.length){
+    const last=valid[valid.length-1].c,minor=last.q.startsWith('m')&&!last.q.startsWith('maj');
+    const tonicPc=(last.root+SONG.trans+120)%12;
+    SONG.flat=flatPref(tonicPc,minor);
+    $('#songKey').textContent='Tonalidad probable (por el último acorde): '+keyLabel(tonicPc,minor).replace(/^(\S+) (mayor|menor)$/,(m,a,b)=>a+' '+b);
+  }else $('#songKey').textContent='Escribe al menos un acorde.';
+  $('#tInfo').textContent=SONG.trans===0?'Original':`${SONG.trans>0?'+':'−'}${Math.abs(SONG.trans)} semitono${Math.abs(SONG.trans)>1?'s':''}`;
+  let n=0;
+  $('#songChips').innerHTML=SONG.lines.filter(l=>l.length).map(l=>`<div class="songline">${l.map(t=>{
+    if(!t.c)return `<span class="sch bad" title="No se reconoce este acorde">${t.raw}?</span>`;
+    const c=mkChord((t.c.root+SONG.trans+120)%12,t.c.q,(t.c.bass+SONG.trans+120)%12,SONG.flat),i=n++;
+    return `<button type="button" class="sch" data-i="${i}" aria-current="${S.cur.src==='song'&&S.idx===i}">${cname(c)}</button>`;
+  }).join('')}</div>`).join('');
+}
+function loadSong(idx){
+  const ch=songChords();if(!ch.length)return;
+  S.cur={src:'song'};S.style='balada';S.bpm=88;syncSettings();
+  setChords(ch,'Mi canción',idx||0);renderSong();
+}
+$('#songTxt').addEventListener('input',()=>{renderSong();});
+$('#songChips').addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;loadSong(+b.dataset.i);chordNow(S.shapes[S.idx]);});
+$('#tUp').onclick=()=>{SONG.trans=(SONG.trans+1)%12;renderSong();if(S.cur.src==='song')loadSong(S.idx);};
+$('#tDown').onclick=()=>{SONG.trans=(SONG.trans+11)%12;renderSong();if(S.cur.src==='song')loadSong(S.idx);};
+$('#tReset').onclick=()=>{SONG.trans=0;renderSong();if(S.cur.src==='song')loadSong(S.idx);};
+$('#songPlay').onclick=()=>{loadSong(0);start();};
+
+/* ---------- Práctica ---------- */
+const QKB=Keyboard($('#kbQ'),{onKey:m=>{if(QZ.done)return;QZ.sel.has(m)?QZ.sel.delete(m):QZ.sel.add(m);clickNote(m);drawQ();}});
+const QZ={chord:null,sel:new Set(),done:false,ok:0,total:0,key:0};
+const QPOOL={
+  1:[[0,''],[5,''],[7,'']],
+  2:[[0,''],[2,'m'],[4,'m'],[5,''],[7,''],[9,'m']],
+  3:[[7,'7'],[2,'m7'],[0,'maj7'],[5,'maj7'],[9,'m7']]
+};
+function newQ(){
+  const keys=[0,7,2,9,5,10,3],tonic=keys[Math.floor(Math.random()*keys.length)];
+  const pool=QPOOL[$('#qLevel').value],pick=pool[Math.floor(Math.random()*pool.length)];
+  QZ.key=tonic;QZ.chord=mkChord((tonic+pick[0])%12,pick[1],null,flatPref(tonic,false));
+  QZ.sel=new Set();QZ.done=false;$('#qMsg').textContent='';$('#qMsg').className='msg';
+  $('#qKey').textContent='En la tonalidad de '+keyLabel(tonic,false);
+  $('#qTarget').textContent=cname(QZ.chord);drawQ();
+}
+function drawQ(showAns){
+  const map=new Map();
+  if(showAns)QZ.chord.pcs.forEach(pc=>{for(let m=48;m<=76;m++)if(m%12===pc)map.set(m,'ans');});
+  QZ.sel.forEach(m=>map.set(m,showAns&&map.get(m)?'ans':'sel'));
+  QKB.show(map,QZ.chord.flats);
+}
+$('#qCheck').onclick=()=>{
+  if(QZ.done)return;
+  const got=new Set([...QZ.sel].map(m=>m%12)),want=new Set(QZ.chord.pcs);
+  const missing=[...want].filter(p=>!got.has(p)).length,extra=[...got].filter(p=>!want.has(p)).length;
+  const msg=$('#qMsg');
+  if(!got.size){msg.textContent='Toca primero las teclas del acorde.';msg.className='msg no';return;}
+  QZ.total++;QZ.done=true;
+  if(!missing&&!extra){QZ.ok++;msg.textContent='Correcto: '+notesOf(QZ.chord)+'.';msg.className='msg ok';}
+  else{msg.textContent=(missing?`Te faltan ${missing} nota${missing>1?'s':''}. `:'')+(extra?`Sobran ${extra}. `:'')+'Las notas eran '+notesOf(QZ.chord)+'.';msg.className='msg no';drawQ(true);}
+  $('#qScore').textContent=`${QZ.ok} de ${QZ.total} acertados`;
+};
+$('#qShow').onclick=()=>{QZ.done=true;drawQ(true);$('#qMsg').textContent='Notas: '+notesOf(QZ.chord);$('#qMsg').className='msg';chordNow({notes:QZ.chord.pcs.map(p=>lowestAtOrAbove(p,60)),bassA:lowestAtOrAbove(QZ.chord.root,36)});};
+$('#qNext').onclick=newQ;$('#qLevel').onchange=newQ;
+
+/* ---------- Mis cantos (cantoral) ---------- */
+const SONGS=[
+{n:75,t:'Señor, ten piedad',pg:40,tonic:9,minor:true,lvl:'Medio',easy:0,style:'bloque',bpm:66,
+ secs:[['Señor, ten piedad…','La7 Rem Sol Do Lam'],['Señor, ten piedad, ten piedad','Sim Mi Lam'],['Cristo, ten piedad…','La7 Rem'],['Cristo, ten piedad…','Sol Do'],['Cristo, ten piedad…','Fa Sim'],['Ten pie-dad','Mi Lam']],
+ tip:'La menor, casi todo en teclas blancas. Las negras son Sol♯ (en Mi) y Do♯ (en La7). El acorde Sim de las líneas 2 y 5 está así impreso en el libro; si no te cuadra con la melodía, confírmalo con quien canta.'},
+{n:125,t:'Buscad primero',pg:65,tonic:2,minor:false,lvl:'Medio',easy:-2,style:'alegre',bpm:100,
+ secs:[['Buscad primero el Reino de Dios','Re Fa#m Sol Re'],['y toda su justicia','Sol Re Mi7 La La7'],['y todo lo demás','Re Fa#m'],['se os dará por añadidura','Sol Re Sol Re La7 Re'],['Aleluya, alelu, aleluya…','Re Fa#m Sol Re Sol Re La La7'],['aleluya, alelu, aleluya…','Re Fa#m Sol Re Sol Re La7 Re']],
+ tip:'Es un canon: se repite en círculo. Practica Re, Fa♯m, Sol, Re hasta que salga sin pensar. Bajado a Do (−2) pierde casi todas las teclas negras.'},
+{n:173,t:'Santo es el Señor',pg:85,tonic:9,minor:true,lvl:'Fácil',easy:0,style:'balada',bpm:88,
+ secs:[['Santo, santo, santo, santo es el Señor','Lam Mi7 Lam Sol Sol7 Do'],['Dios del universo, santo es el Señor','Sol Mi Mi7 Lam'],['Hosanna en el cielo, hosanna en la tierra','La Rem Sol Do'],['Bendito el que viene en nombre del Señor','Rem Mi Mi7 Lam']],
+ tip:'La menor, sin alteraciones. Solo hay dos teclas negras: Sol♯ (en Mi y Mi7) y Do♯ (en La mayor). Pulso firme y solemne.'},
+{n:199,t:'Cordero de Dios',pg:97,tonic:2,minor:false,lvl:'Difícil',easy:-2,style:'arpegio',bpm:64,
+ secs:[['Cordero de Dios, que quitas el pecado','Re La7 Re Si7 Mim'],['el pecado del mundo','La7 Re'],['ten piedad, Señor, ten piedad','Mim Sol Re Sim'],['de nosotros, Señor, ten piedad','Fa#m Sim Si7'],['ten piedad, Señor, ten piedad','Mim Sol Re Sim'],['de nosotros y danos la paz','Fa# Fa#7 Sim']],
+ tip:'Es el más exigente de tu lista: lleva Fa♯, Fa♯7 y Si7. Bajado dos semitonos (Do) tiene menos teclas negras. Alarga el último acorde en “danos la paz”.'},
+{n:267,t:'Tú reinarás',pg:126,tonic:4,minor:false,lvl:'Medio',easy:-4,style:'balada',bpm:92,
+ secs:[['Tú reinarás, este es el grito','Mi La Fa#7 Si'],['Tú reinarás, oh Rey bendito','Mi Fa# Fa#7 Si'],['Reine Jesús por siempre (coro)','Mi Si7 Mi'],['En nuestra patria, en nuestro suelo','Si7'],['que es de María la nación','Mi Fa#7 Si'],['en nuestra patria, en nuestro suelo','La Mi'],['que es de María la nación','Si Si7 Mi']],
+ tip:'Mi mayor tiene cuatro sostenidos. Si el coro lo canta cómodo más grave, pásalo a Do (−4) y casi todo queda en teclas blancas; Re (−2) es un punto medio. Las estrofas 2 a 5 usan la música de las dos primeras líneas.'},
+{n:266,t:'Si yo no tengo amor',pg:125,tonic:2,minor:false,lvl:'Medio',easy:-2,style:'arpegio',bpm:80,
+ secs:[['Si yo no tengo amor… (coro)','Re Mim La7'],['Si yo no tengo amor…','Re La7 Re'],['El amor es comprensivo (estrofa)','Re La Sim Fa#m'],['el amor no tiene envidia','Sol Mim Re La7']],
+ tip:'Coro de dos líneas y cinco estrofas con la misma música. Fa♯m es el acorde más incómodo; en Do (−2) pasa a Mim.'},
+{n:252,t:'Danos un corazón',pg:120,tonic:11,minor:true,lvl:'Medio',easy:-2,style:'balada',bpm:92,
+ secs:[['Danos un corazón grande para amar (coro)','Sim Fa# Sim Sol La Re'],['danos un corazón fuerte para luchar','Sim Fa# Sim La Sim'],['Hombres nuevos, creadores de la historia','Sim Sol La Re'],['constructores de nueva humanidad','Sol La Re'],['hombres nuevos que viven la existencia','Sim Sol La Sim'],['como riesgo de un largo caminar','Sol Mim Fa#']],
+ tip:'Si menor tiene muchas teclas negras. Bajado dos semitonos queda en La menor y casi todo en teclas blancas. Las estrofas 2 y 3 repiten la música de la 1.'},
+{n:251,t:'No me habéis vosotros elegido',pg:119,tonic:2,minor:false,lvl:'Medio',easy:-2,style:'arpegio',bpm:76,
+ secs:[['No me habéis vosotros elegido','Re La Sim'],['fui yo mismo quien os elegí','Sol Mim La'],['ya no os llamo siervos sino amigos','Re Fa#7 Sim'],['permaneceréis, para siempre, junto a mí','Re Sol Re']],
+ tip:'Cuatro estrofas con los mismos acordes. El cambio clave es Fa♯7 a Sim: ensáyalo solo, despacio.'},
+{n:1001,tag:'CLN 702',t:'Cerca de Ti, Señor',src:'Cancionero litúrgico, p. 52 (partitura en Sol)',bar:3,tonic:7,minor:false,lvl:'Fácil',easy:0,style:'bloque',bpm:84,
+ dur:'1.5 1.5 3 3 3 1.5 1.5 3 1.5 1.5 3 1.5 1.5 3 3 1.5 1.5',
+ mel:'Si4/1.5 La4/1 Sol4/.5 Sol4/1 Mi4/.5 Mi4/1.5 Re4/1.5 Sol4/1 Si4/.5 La4/2.5 -/.5 Si4/1.5 La4/1 Sol4/.5 Sol4/1 Mi4/.5 Mi4/1.5 Re4/1 Sol4/.5 Fa#4/1 La4/.5 Sol4/2.5 -/.5 Re5/1.5 Mi5/1 Re5/.5 Re5/1 Si4/.5 Re5/1.5 Re5/1.5 Mi5/1 Re5/.5 Re5/1 Si4/.5 La4/1.5',
+ secs:[['Cerca de Ti, Señor, yo quiero estar','Sol Re7 Do Sol Re7'],['Tu grande eterno amor, quiero gozar','Sol Re7 Do Sol Re7 Sol'],['Llena mi pobre ser, limpia mi corazón','Sol Do Sol Do Sol Re7']],
+ tip:'Solo tres acordes: Sol, Do y Re7. Está en compás de 6/8: dos golpes de tres corcheas, que en la página se cuentan como 3 tiempos por compás. La partitura impresa está en Sol; el tono original que indica el libro es Fa (baja 2 semitonos con − ½ tono). La foto solo llega al compás 12, falta el resto de la tercera línea.'},
+{n:248,t:'Cristo está conmigo',pg:118,tonic:0,minor:false,lvl:'Fácil',easy:0,style:'balada',bpm:84,
+ secs:[['Cristo está conmigo (coro)','Do Fa Do'],['junto a mí va el Señor','Sol'],['me acompaña siempre','Do Fa Do'],['en mi vida hasta el fin','Sol Sol7 Do'],['Ya no temo, Señor, la tristeza (estrofa)','Do7 Fa Do'],['ya no temo, Señor, la soledad','Fa Do'],['porque eres, Señor, mi alegría','Rem Sol7 Lam'],['tengo siempre tu amistad','Fa Sol Sol7']],
+ tip:'El mejor para empezar: Do mayor con teclas blancas. La única negra es Si♭ en Do7. Las estrofas 2 a 5 usan los mismos acordes.'}
+];
+const PARTS=[['Otros cantos',[1001]],['Canto de entrada',[28]],['Canto penitencial',[75]],['Aleluya',[125]],['Santo',[173]],['Cordero de Dios',[199]],['Comunión',[267,266,252,251,248]]];
+const ST={};
+function songData(s){
+  const t=ST[s.n]||0,tonic=(s.tonic+t+120)%12,flats=flatPref(tonic,s.minor);let k=0;
+  const secs=s.secs.map(([cue,str])=>({cue,ch:str.split(' ').map(tok=>{
+    const p=parseChord(tok);
+    return {c:mkChord((p.root+t+120)%12,p.q,(p.bass+t+120)%12,flats),i:k++};
+  })}));
+  return {t,tonic,secs,all:[].concat(...secs.map(x=>x.ch.map(y=>y.c)))};
+}
+function songCard(s){
+  const d=songData(s),cls={'Fácil':'ok','Medio':'mid','Difícil':'hard'}[s.lvl];
+  const lines=d.secs.map(sec=>`<div class="sline"><span class="cue">${sec.cue}</span><div class="songline">${sec.ch.map(x=>`<button type="button" class="sch" data-n="${s.n}" data-i="${x.i}" aria-current="false">${cname(x.c)}</button>`).join('')}</div></div>`).join('');
+  const seen=new Map();d.secs.forEach(sec=>sec.ch.forEach(x=>{const k=cname(x.c);if(!seen.has(k))seen.set(k,x);}));
+  const uniq=[...seen.values()].map(x=>`<button type="button" class="uc" data-n="${s.n}" data-i="${x.i}"><b>${cname(x.c)}</b><span>${notesOf(x.c)}</span></button>`).join('');
+  const tt=d.t>6?d.t-12:d.t,tl=tt===0?'original':`${tt>0?'+':'−'}${Math.abs(tt)} semitono${Math.abs(tt)>1?'s':''}`;
+  return `<article class="card" id="song-${s.n}">
+    <div class="shead"><span class="snum">${s.tag||s.n}</span><h3>${s.t}</h3><span class="badge ${cls}">${s.lvl}</span></div>
+    <p class="meta">Tono: <b>${keyLabel(d.tonic,s.minor)}</b> (${tl}) · Ritmo sugerido: ${STYLES[s.style].n}, ${s.bpm} bpm · ${s.src||('Cantoral, p. '+s.pg)}</p>
+    <div class="btnrow">
+      <button type="button" class="btn pri" data-act="play" data-n="${s.n}">Tocar canto</button>
+      <button type="button" class="btn" data-act="roll" data-n="${s.n}">Notas que caen</button>
+      <button type="button" class="btn" data-act="down" data-n="${s.n}">− ½ tono</button>
+      <button type="button" class="btn" data-act="up" data-n="${s.n}">+ ½ tono</button>
+      ${s.easy!==0?`<button type="button" class="btn" data-act="easy" data-n="${s.n}">Tono más fácil (${keyLabel((s.tonic+s.easy+120)%12,s.minor)})</button>`:''}
+      ${d.t!==0?`<button type="button" class="btn" data-act="orig" data-n="${s.n}">Tono original</button>`:''}
+    </div>
+    <div>${lines}</div>
+    <p class="tip">${s.tip}</p>
+    <details><summary>Acordes que necesitas (${seen.size}): ensáyalos antes</summary><div class="ucs">${uniq}</div></details>
+  </article>`;
+}
+function renderCantos(){
+  $('#cantosList').innerHTML=PARTS.map(([part,ns])=>`<div class="partgroup"><h2>${part}</h2>${ns.map(n=>{
+    const s=SONGS.find(x=>x.n===n);
+    return s?songCard(s):`<article class="card"><div class="shead"><span class="snum">${n}</span><h3>Llegará la libertad</h3></div><p class="note">Este canto no está en el PDF que enviaste: falta la página 21 del cantoral (el escaneo salta de la 20 a la 22). Envíame una foto de esa página y lo agrego aquí.</p></article>`;
+  }).join('')}</div>`).join('');
+  markCantos();
+}
+function markCantos(){
+  $$('#cantosList .sch').forEach(b=>b.setAttribute('aria-current',String(S.cur.src==='cantos'&&+b.dataset.n===S.cur.n&&+b.dataset.i===S.idx)));
+}
+function loadCanto(n,idx){
+  const s=SONGS.find(x=>x.n===n),d=songData(s),fresh=!(S.cur.src==='cantos'&&S.cur.n===n);
+  S.cur={src:'cantos',n};
+  if(fresh){S.style=s.style;S.bpm=s.bpm;syncSettings();}
+  setChords(d.all,`${s.tag||s.n} · ${s.t} · ${keyLabel(d.tonic,s.minor)}`,idx||0);
+}
+$('#cantosList').addEventListener('click',e=>{
+  const b=e.target.closest('[data-n]');if(!b)return;
+  const n=+b.dataset.n,s=SONGS.find(x=>x.n===n),act=b.dataset.act;
+  if(!act){loadCanto(n,+b.dataset.i);chordNow(S.shapes[S.idx]);return;}
+  if(act==='play'){loadCanto(n,0);start();return;}
+  if(act==='roll'){openRoll(n);return;}
+  if(act==='up')ST[n]=((ST[n]||0)+1)%12;
+  if(act==='down')ST[n]=((ST[n]||0)+11)%12;
+  if(act==='easy')ST[n]=(s.easy+12)%12;
+  if(act==='orig')ST[n]=0;
+  const was=S.cur.src==='cantos'&&S.cur.n===n,keep=S.idx;
+  renderCantos();
+  if(R.open&&R.n===n){buildRoll();drawRoll();}
+  if(was)loadCanto(n,keep);
+});
+
+/* ---------- Notas que caen ---------- */
+const R={open:false,on:false,n:null,all:[],ev:[],groups:[],gi:0,t:-4,hold:false,last:0,end:0,pressed:new Set(),raf:0,mel:{},mode:'auto',sound:'all',bus:null,speed:.75,hands:'both',guide:true,flats:false,bpm:84,hasMel:false};
+const KR=Keyboard($('#kbR'),{onKey:m=>{
+  clickNote(m);
+  if(R.on&&R.mode==='wait'&&R.hold){R.pressed.has(m)?R.pressed.delete(m):R.pressed.add(m);checkWait();showKeysR();}
+}});
+const RWH=[];for(let m=48;m<=76;m++)if(![1,3,6,8,10].includes(m%12))RWH.push(m);
+function lane(m,W){
+  const Ww=W/RWH.length;
+  if([1,3,6,8,10].includes(m%12)){const wi=RWH.indexOf(m-1),w=Ww*.55;return {x:(wi+1)*Ww-w/2,w};}
+  return {x:RWH.indexOf(m)*Ww+Ww*.08,w:Ww*.84};
+}
+function parseMel(txt,tt){
+  const out=[];let t0=0,bad=0,off=0;
+  txt.replace(/♭/g,'b').replace(/♯/g,'#').split(/[\s,]+/).filter(Boolean).forEach(tok=>{
+    const m=/^(sol|do|re|mi|fa|la|si|[a-g]|-|r)([#b]?)(\d?)(?:\/(\d*\.?\d+))?$/i.exec(tok);
+    if(!m){bad++;return;}
+    const nm=m[1].toLowerCase(),dur=m[4]?parseFloat(m[4]):1;
+    if(nm==='-'||nm==='r'){t0+=dur;return;}
+    if(m[3]===''){bad++;return;}
+    const base=nm.length>1?LPC[nm]:LET[nm],pc=(base+(m[2]==='#'?1:m[2]==='b'?-1:0)+12)%12;
+    const midi=(+m[3]+1)*12+pc+tt;
+    if(midi<48||midi>76)off++;else out.push({m:midi,s:t0,d:Math.max(.2,dur*.9),h:'R'});
+    t0+=dur;
+  });
+  return {out,bad,off,len:t0};
+}
+function buildRoll(){
+  const s=SONGS.find(x=>x.n===R.n),d=songData(s),tt=d.t>6?d.t-12:d.t,bars=s.bar||4,durs=(s.dur||'').split(' ').filter(Boolean).map(Number),ev=[];let st=0;R.bar=bars;
+  R.flats=flatPref(d.tonic,s.minor);R.bpm=s.bpm;
+  const mel=R.mel[R.n];let pm=null;
+  if(mel){pm=parseMel(mel,tt);R.hasMel=pm.out.length>0;
+    $('#melMsg').textContent=(pm.out.length?pm.out.length+' notas. ':'No se leyó ninguna nota. ')+(pm.bad?pm.bad+' no reconocidas. ':'')+(pm.off?pm.off+' fuera del teclado.':'');
+  }else{R.hasMel=false;$('#melMsg').textContent='';}
+  let pl=null,pr=null;
+  d.all.forEach((c,i)=>{
+    const dd=durs[i]||bars,L=voice(c,pl,'izq');pl=L.notes;
+    L.notes.forEach(m=>ev.push({m,s:st,d:dd*.9,h:'L'}));
+    if(!R.hasMel&&R.guide){const Rr=voice(c,pr,'dos');pr=Rr.notes;Rr.notes.forEach(m=>ev.push({m,s:st,d:dd*.9,h:'R'}));}
+    st+=dd;
+  });
+  if(R.hasMel)pm.out.forEach(e=>ev.push(e));
+  R.all=ev;applyHands();
+}
+function applyHands(){
+  R.ev=R.all.filter(e=>R.hands==='both'||e.h===R.hands);
+  R.ev.forEach(e=>e.p=false);
+  const ss=[...new Set(R.ev.map(e=>e.s))].sort((a,b)=>a-b);
+  R.groups=ss.map(st=>({s:st,ev:R.ev.filter(e=>e.s===st)}));
+  R.end=R.ev.reduce((a,e)=>Math.max(a,e.s+e.d),0);
+  resetRoll(true);
+}
+function resetRoll(keepOn){
+  if(R.raf)cancelAnimationFrame(R.raf);R.raf=0;R.on=false;rollSilence();
+  R.gi=0;R.hold=false;R.pressed=new Set();R.t=R.mode==='wait'?-3:-4;
+  R.groups.forEach(g=>g.done=false);R.ev.forEach(e=>e.p=false);
+  $('#rPlay').textContent='Reproducir';$('#rNext').hidden=R.mode!=='wait';
+  $('#rStat').textContent='Listo. Pulsa Reproducir.';
+  showKeysR();drawRoll();
+}
+function openRoll(n){
+  R.n=n;R.open=true;stop();
+  const s=SONGS.find(x=>x.n===n);
+  if(R.mel[n]===undefined&&s.mel)R.mel[n]=s.mel;
+  $('#rollTitle').textContent=`Notas que caen · ${s.tag||s.n} ${s.t}`;
+  $('#melTxt').value=R.mel[n]||'';
+  document.body.classList.add('rolling');
+  $('#rollCard').hidden=false;buildRoll();
+  $('#rollCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function showKeysR(){
+  const map=new Map();
+  const t=R.t;
+  R.ev.forEach(e=>{if(e.s<=t&&t<e.s+e.d)map.set(e.m,e.h==='R'?'rb':'lg');});
+  if(R.mode==='wait'&&R.hold&&R.groups[R.gi])R.groups[R.gi].ev.forEach(e=>map.set(e.m,e.h==='R'?'rb':'lg'));
+  R.pressed.forEach(m=>{if(!map.has(m))map.set(m,'sel');});
+  KR.show(map,R.flats);
+}
+function drawRoll(){
+  const cv=$('#rollCv');if(!cv)return;
+  const W=cv.clientWidth,H=cv.clientHeight,dpr=window.devicePixelRatio||1;
+  if(!W)return;
+  if(cv.width!==Math.round(W*dpr)||cv.height!==Math.round(H*dpr)){cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);}
+  const g=cv.getContext('2d');g.setTransform(dpr,0,0,dpr,0,0);
+  const cs=getComputedStyle(document.documentElement),col=n=>cs.getPropertyValue(n).trim();
+  g.clearRect(0,0,W,H);
+  g.fillStyle=col('--surface2');g.fillRect(0,0,W,H);
+  const Ww=W/RWH.length;
+  g.globalAlpha=.35;g.fillStyle=col('--line');
+  for(let m=48;m<=76;m++)if([1,3,6,8,10].includes(m%12)){const l=lane(m,W);g.fillRect(l.x-Ww*.03,0,l.w+Ww*.06,H);}
+  g.globalAlpha=.7;g.strokeStyle=col('--line');g.lineWidth=1;
+  RWH.forEach((m,i)=>{g.beginPath();g.moveTo(Math.round(i*Ww)+.5,0);g.lineTo(Math.round(i*Ww)+.5,H);g.stroke();});
+  g.globalAlpha=1;
+  const hitY=H-3,ppb=(H-3)/6,t=R.t;
+  g.strokeStyle=col('--line');
+  for(let b=Math.ceil(t);b<t+7;b++){if(b%(R.bar||4))continue;const y=hitY-(b-t)*ppb;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  const rr=(x,y,w,h,r)=>{g.beginPath();if(g.roundRect)g.roundRect(x,y,w,h,r);else g.rect(x,y,w,h);g.fill();};
+  g.font='600 11px '+col('--f-mono');g.textAlign='center';g.textBaseline='middle';
+  R.ev.forEach(e=>{
+    const yb=hitY-(e.s-t)*ppb,yt=yb-e.d*ppb;
+    if(yt>hitY||yb<0)return;
+    const y2=Math.min(yb,hitY),y1=Math.max(yt,0),h=y2-y1;
+    if(h<3)return;
+    const l=lane(e.m,W);
+    g.fillStyle=col(e.h==='R'?'--blue':'--green');
+    rr(l.x,y1,l.w,h-2,6);
+    if(h>20&&yt>=0){g.fillStyle=col('--on-accent');g.fillText(nn(e.m%12,R.flats),l.x+l.w/2,Math.min(y2-10,y1+12));}
+  });
+  g.strokeStyle=col('--fg');g.globalAlpha=.55;g.lineWidth=2;g.beginPath();g.moveTo(0,hitY);g.lineTo(W,hitY);g.stroke();g.globalAlpha=1;
+}
+function rollBus(){if(!R.bus){R.bus=ctx.createGain();R.bus.gain.value=1;R.bus.connect(master);}return R.bus;}
+function rollSilence(){
+  if(!R.bus||!ctx)return;
+  const b=R.bus;R.bus=null;b.gain.setTargetAtTime(0,ctx.currentTime,.015);
+  setTimeout(()=>{try{b.disconnect();}catch(e){}},250);
+}
+function playEvs(evs){
+  try{
+    if(!audio()||R.sound==='none')return;
+    const list=evs.filter(e=>R.sound==='all'||(R.sound==='mel'&&e.h==='R')||(R.sound==='chords'&&e.h==='L'));
+    if(!list.length)return;
+    const t=ctx.currentTime,bps=R.bpm*R.speed/60,v=.3/Math.sqrt(list.length),dest=rollBus();
+    list.forEach(e=>tone(e.m,t,Math.max(.25,e.d/bps),v,dest));
+  }catch(x){}
+}
+function checkWait(){
+  const g=R.groups[R.gi];if(!g||!R.hold)return;
+  const got=new Set([...R.pressed].map(m=>m%12));
+  if(g.ev.every(e=>got.has(e.m%12)))advanceWait();
+}
+function advanceWait(){
+  const g=R.groups[R.gi];if(!g||!R.hold)return;
+  playEvs(g.ev);R.gi++;R.hold=false;R.pressed=new Set();
+}
+function frame(ts){
+  if(!R.on)return;
+  const dt=Math.min(.05,(ts-R.last)/1000);R.last=ts;
+  const bps=R.bpm*R.speed/60,adv=dt*bps;
+  if(R.mode==='auto'){
+    R.t+=adv;
+    R.ev.forEach(e=>{if(!e.p&&e.s<=R.t){e.p=true;}});
+    const due=R.groups.filter(g=>!g.done&&g.s<=R.t);
+    due.forEach(g=>{g.done=true;playEvs(g.ev);});
+  }else if(!R.hold){
+    const g=R.groups[R.gi];
+    if(g&&R.t+adv>=g.s){R.t=g.s;R.hold=true;}else R.t+=adv;
+  }
+  const g=R.groups[R.gi];
+  if(R.mode==='wait'&&R.hold&&g){
+    const names=[...new Set(g.ev.map(e=>nn(e.m%12,R.flats)))].join(' – ');
+    $('#rStat').textContent='Toca: '+names;
+  }else{
+    const bl=R.bar||4,total=Math.ceil(R.end/bl),bar=Math.min(total,Math.max(1,Math.floor(R.t/bl)+1));
+    $('#rStat').textContent=R.t<0?'Prepárate…':`Compás ${bar} de ${total}`;
+  }
+  showKeysR();drawRoll();
+  if(R.t>R.end+1||(R.mode==='wait'&&R.gi>=R.groups.length&&R.t>R.end)){
+    R.on=false;$('#rPlay').textContent='Reproducir';$('#rStat').textContent='¡Terminaste! Pulsa Reiniciar para repetir.';
+    return;
+  }
+  R.raf=requestAnimationFrame(frame);
+}
+function toggleRoll(){
+  if(R.on){R.on=false;cancelAnimationFrame(R.raf);rollSilence();$('#rPlay').textContent='Reanudar';return;}
+  try{audio();}catch(e){}
+  stop();
+  if(R.t>R.end+1)resetRoll();
+  R.on=true;R.last=performance.now();$('#rPlay').textContent='Pausa';
+  R.raf=requestAnimationFrame(frame);
+}
+$('#rPlay').onclick=()=>{toggleRoll();$('#rPlay').blur();};
+$('#rReset').onclick=()=>{R.groups.forEach(g=>g.done=false);R.ev.forEach(e=>e.p=false);resetRoll();};
+$('#rNext').onclick=advanceWait;
+$('#rMode').onchange=e=>{R.mode=e.target.value;R.groups.forEach(g=>g.done=false);resetRoll();};
+$('#rSpeed').onchange=e=>{R.speed=+e.target.value;};
+$('#rSound').onchange=e=>{R.sound=e.target.value;rollSilence();};
+$('#rHands').onchange=e=>{R.hands=e.target.value;applyHands();};
+$('#rGuide').onchange=e=>{R.guide=e.target.checked;buildRoll();};
+$('#melUse').onclick=()=>{R.mel[R.n]=$('#melTxt').value.trim();buildRoll();};
+$('#melClear').onclick=()=>{delete R.mel[R.n];$('#melTxt').value='';buildRoll();};
+$('#rollClose').onclick=()=>{document.body.classList.remove('rolling');R.open=false;R.on=false;cancelAnimationFrame(R.raf);rollSilence();$('#rollCard').hidden=true;};
+document.addEventListener('keydown',e=>{
+  if(!R.open||e.code!=='Space')return;
+  if(['TEXTAREA','INPUT','SELECT','BUTTON'].includes(document.activeElement.tagName))return;
+  e.preventDefault();advanceWait();
+});
+new ResizeObserver(()=>{if(R.open)drawRoll();}).observe($('#rollCv'));
+
+/* ---------- Ajustes y navegación ---------- */
+function syncSettings(){
+  $('#selStyle').value=S.style;$('#rngBpm').value=S.bpm;$('#bpmOut').textContent=S.bpm;
+  $('#selTonic').value=S.tonic;$('#selHands').value=S.hands;$('#selVoice').value=S.voice;
+}
+function reloadCurrent(){
+  const c=S.cur;
+  if(c.src==='misa')loadProg(c.m,c.p);
+  else if(c.src==='campo')loadCampo(S.idx);
+  else if(c.src==='chord')loadFinder();
+  else if(c.src==='song')loadSong(S.idx);
+  renderCampo();renderSong();renderMisa();
+}
+$('#selTonic').onchange=e=>{S.tonic=+e.target.value;reloadCurrent();};
+$('#selHands').onchange=e=>{S.hands=e.target.value;S.shapes=shapesFor(S.chords);renderStage();};
+$('#selVoice').onchange=e=>{S.voice=e.target.value;S.shapes=shapesFor(S.chords);renderStage();};
+$('#selStyle').onchange=e=>{S.style=e.target.value;};
+$('#rngBpm').oninput=e=>{S.bpm=+e.target.value;$('#bpmOut').textContent=S.bpm;};
+$$('[data-names]').forEach(b=>b.onclick=()=>{
+  S.latin=b.dataset.names==='latin';
+  $$('[data-names]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  buildSelects();renderStage();renderMisa();renderCampo();renderSong();if(QZ.chord){$('#qTarget').textContent=cname(QZ.chord);$('#qKey').textContent='En la tonalidad de '+keyLabel(QZ.key,false);drawQ(QZ.done&&!$('#qMsg').classList.contains('ok'));}
+});
+$$('[data-season]').forEach(b=>b.onclick=()=>{
+  S.season=b.dataset.season;document.documentElement.dataset.season=S.season;
+  $$('[data-season]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+  if(S.cur.src==='misa')loadProg(S.cur.m,0);else renderMisa();
+});
+
+const TABS=['cantos','misa','acordes','ritmos','cancion','practica'];
+function showTab(){
+  const h=(location.hash||'#cantos').slice(1),t=TABS.includes(h)?h:'cantos';
+  TABS.forEach(id=>{$('#p-'+id).hidden=id!==t;});
+  $$('.tabs a').forEach(a=>{if(a.dataset.tab===t)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
+  if(t==='acordes'&&S.cur.src!=='campo'&&S.cur.src!=='chord')loadCampo(0);
+  if(t==='cancion'&&S.cur.src!=='song'){renderSong();loadSong(0);}
+}
+window.addEventListener('hashchange',showTab);
+
+/* ---------- Inicio ---------- */
+buildSelects();
+$('#selStyle').innerHTML=Object.entries(STYLES).map(([id,s])=>`<option value="${id}">${s.n}</option>`).join('');
+renderRitmos();renderSong();newQ();renderCantos();
+loadProg('entrada',0);
+syncSettings();
+showTab();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
+let dp=null;const bi=document.getElementById('btnInstall');
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();dp=e;if(bi)bi.hidden=false;});
+if(bi)bi.addEventListener('click',async()=>{if(!dp)return;dp.prompt();await dp.userChoice;dp=null;bi.hidden=true;});
+window.addEventListener('appinstalled',()=>{if(bi)bi.hidden=true;});
+</script>
+
+
+</body>
+</html>

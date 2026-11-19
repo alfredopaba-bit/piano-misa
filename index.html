@@ -196,7 +196,7 @@ ol.tight{margin:0;padding-left:20px;display:grid;gap:4px}
     <div>
       <h1>Piano para la Misa</h1>
       <p class="sub">Qué teclas tocar en cada parte de la celebración. Teclado organeta, nivel medio, acordes en cifrado.</p>
-      <p class="meta" id="ver">Versión 6 · 19 nov 2026 · cantos: Cerca de Ti, Señor (completo), Señor ten piedad (versión 1 y 2), Cordero de Dios (Mejía)</p>
+      <p class="meta" id="ver">Versión 7 · 19 nov 2026 · con partitura: Cerca de Ti, Señor, Señor ten piedad (1 y 2), Cordero de Dios, Tú reinarás</p>
     </div>
     <div class="btnrow"><button type="button" class="btn" id="btnInstall" hidden>Instalar app</button>
     <div class="seg" role="group" aria-label="Tiempo litúrgico">
@@ -257,7 +257,7 @@ ol.tight{margin:0;padding-left:20px;display:grid;gap:4px}
     <section class="panel" id="p-cantos">
       <div class="season"><b>Repertorio · Misa de Adviento</b><span>Acordes tomados del cantoral “Cantemos al Dios de la vida” (5.ª edición). Pulsa un acorde para ver sus teclas arriba. “Tocar canto” los reproduce en orden, un compás cada uno, solo como guía de armonía. En Adviento no se canta el Gloria, por eso no aparece.</span></div>
       <div class="card"><h3>Orden de práctica, de más fácil a más difícil</h3>
-        <ol class="tight"><li>248 Cristo está conmigo</li><li>173 Santo es el Señor</li><li>75 Señor, ten piedad</li><li>251 No me habéis vosotros elegido</li><li>266 Si yo no tengo amor</li><li>252 Danos un corazón</li><li>125 Buscad primero</li><li>267 Tú reinarás</li><li>199 Cordero de Dios</li></ol></div>
+        <ol class="tight"><li>248 Cristo está conmigo</li><li>173 Santo es el Señor</li><li>75 Señor, ten piedad</li><li>251 No me habéis vosotros elegido</li><li>266 Si yo no tengo amor</li><li>252 Danos un corazón</li><li>125 Buscad primero</li><li>Tú reinarás (partitura)</li><li>199 Cordero de Dios</li></ol></div>
       <div class="card" id="rollCard" hidden>
         <div class="btnrow" style="justify-content:space-between"><h3 id="rollTitle">Notas que caen</h3><button type="button" class="btn" id="rollClose">Cerrar</button></div>
         <div class="legendr"><span><i class="dot g"></i>Mano izquierda: acordes</span><span><i class="dot b"></i>Mano derecha</span></div>
@@ -891,9 +891,11 @@ const SONGS=[
 {n:199,t:'Cordero de Dios',pg:97,tonic:2,minor:false,lvl:'Difícil',easy:-2,style:'arpegio',bpm:64,
  secs:[['Cordero de Dios, que quitas el pecado','Re La7 Re Si7 Mim'],['el pecado del mundo','La7 Re'],['ten piedad, Señor, ten piedad','Mim Sol Re Sim'],['de nosotros, Señor, ten piedad','Fa#m Sim Si7'],['ten piedad, Señor, ten piedad','Mim Sol Re Sim'],['de nosotros y danos la paz','Fa# Fa#7 Sim']],
  tip:'Es el más exigente de tu lista: lleva Fa♯, Fa♯7 y Si7. Bajado dos semitonos (Do) tiene menos teclas negras. Alarga el último acorde en “danos la paz”.'},
-{n:267,t:'Tú reinarás',pg:126,tonic:4,minor:false,lvl:'Medio',easy:-4,style:'balada',bpm:92,
- secs:[['Tú reinarás, este es el grito','Mi La Fa#7 Si'],['Tú reinarás, oh Rey bendito','Mi Fa# Fa#7 Si'],['Reine Jesús por siempre (coro)','Mi Si7 Mi'],['En nuestra patria, en nuestro suelo','Si7'],['que es de María la nación','Mi Fa#7 Si'],['en nuestra patria, en nuestro suelo','La Mi'],['que es de María la nación','Si Si7 Mi']],
- tip:'Mi mayor tiene cuatro sostenidos. Si el coro lo canta cómodo más grave, pásalo a Do (−4) y casi todo queda en teclas blancas; Re (−2) es un punto medio. Las estrofas 2 a 5 usan la música de las dos primeras líneas.'},
+{n:1005,tag:'Himno',t:'Tú reinarás',src:'Partitura de José M. Castro B. (I.E.P. San Vicente de Paúl)',bar:4,pick:2,tonic:9,minor:false,lvl:'Medio',easy:-2,style:'balada',bpm:100,
+ dur:'4 2 2 2 1 1 2 2 2 1 1 1 1 2 2 1 1 2 2 4 4 2 2 4 4 4 2 1 1 4 4 2 2 3 1 2 1 1 4 2 2 2 1 1 2 2 2 1 1 1 1 2 2 1 1 2 2 4 4 2 2 4 4 4 2 1 1 4 4 2 2 3 1 2 1 1 4 2 2 2 1 1 2 2 2 1 1 1 1 2 2 1 1 5',
+ mel:'-/.5 Do#5/.5 Do#5/.5 Re5/.5 Mi5/1.5 Re5/.5 Do#5/1 Mi5/1 Mi5/1 Re5/1 -/.5 Si4/.5 Do#5/.5 Re5/.5 Do#5/1.5 Do#5/.5 Si4/1 La4/1 Mi5/2 -/.5 Do#5/.5 Re5/.5 Mi5/.5 Fa#5/1.5 Si4/.5 Do#5/1 Re5/1 Fa#5/1 Mi5/1 -/.5 Mi4/.5 La4/.5 Do#5/.5 Mi5/1.5 Fa#5/.5 Mi5/1 Re5/1 Do#5/2 -/.5 Mi4/.5 Fa#4/.5 Sol#4/.5 La4/2 Do#5/1 La4/.5 Mi4/.5 Do#5/1 La4/1 -/.5 La4/.5 Si4/.5 Do#5/.5 Re5/1 Do#5/1 Si4/1 La4/1 Si4/2 -/.5 Mi4/.5 Fa#4/.5 Sol#4/.5 La4/2 Do#5/1 La4/.5 Mi4/.5 Do#5/1 La4/1 -/.5 La4/.5 Sol#4/.5 La4/.5 Si4/1.5 Si4/.5 Do#5/1 Re#5/1 Mi5/3 -/1 La4/1 La4/.5 Sol#4/.5 La4/1 Do#5/1 Do#5/2 Si4/1 -/1 Si4/1 Si4/.5 La4/.5 Si4/1 Re5/.5 Do#5/.5 Sol#4/2 -/.5 Do#5/.5 Do#5/.5 Re5/.5 Mi5/1.5 Re5/.5 Do#5/1 Mi5/1 Mi5/1 Re5/1 -/.5 Si4/.5 Do#5/.5 Re5/.5 Do#5/1.5 Do#5/.5 Si4/1 La4/1 Mi5/2 -/.5 Do#5/.5 Re5/.5 Mi5/.5 Fa#5/1.5 Si4/.5 Do#5/1 Re5/1 Fa#5/1 Mi5/1 -/.5 Mi4/.5 La4/.5 Do#5/.5 Mi5/1.5 Fa#5/.5 Mi5/1 Re5/1 La4/2 -/.5 Mi4/.5 Fa#4/.5 Sol#4/.5 La4/2 Do#5/1 La4/.5 Mi4/.5 Do#5/1 La4/1 -/.5 La4/.5 Si4/.5 Do#5/.5 Re5/1 Do#5/1 Si4/1 La4/1 Si4/2 -/.5 Mi4/.5 Fa#4/.5 Sol#4/.5 La4/2 Do#5/1 La4/.5 Mi4/.5 Do#5/1 La4/1 -/.5 La4/.5 Sol#4/.5 La4/.5 Si4/1.5 Si4/.5 Do#5/1 Re#5/1 Mi5/3 -/1 La4/1 La4/.5 Sol#4/.5 La4/1 Do#5/1 Do#5/2 Si4/1 -/1 Si4/1 Si4/.5 La4/.5 Si4/1 Re5/.5 Do#5/.5 Sol#4/2 -/.5 Do#5/.5 Do#5/.5 Re5/.5 Mi5/1.5 Re5/.5 Do#5/1 Mi5/1 Mi5/1 Re5/1 -/.5 Si4/.5 Do#5/.5 Re5/.5 Do#5/1.5 Do#5/.5 Si4/1 La4/1 Mi5/2 -/.5 Do#5/.5 Re5/.5 Mi5/.5 Fa#5/1.5 Si4/.5 Do#5/1 Re5/1 Fa#5/1 Mi5/1 -/.5 Mi4/.5 La4/.5 Do#5/.5 Mi5/1.5 Fa#5/.5 Mi5/1 Re5/1 Mi5/5',
+ secs:[['Introducción de voces (8 compases)','A E E7 A E A E A D A D D E A A A E A E'],['Estrofa 1: ¡Tú reinarás! Este es el grito…','A A E7 A E A A E A B7 A'],['Coro: Reine Jesús por siempre…','A A E E A E A E7 A E E7 A E A E A D A D D E A'],['Paso a la estrofa 2 (primera casilla 1, 2, 3)','A A E A E'],['Estrofa 2: ¡Tú reinarás! Dulce esperanza…','A A E7 A E A A E A B7 A'],['Coro otra vez','A A E E A E A E7 A E E7 A E A E A D A D D E A'],['Final (casilla 4) y acorde largo','A A E A']],
+ tip:'En La mayor, compás de 4/4. La partitura trae dos voces en terceras; aquí va la voz de arriba, que lleva la melodía. Orden de una pasada: introducción de 8 compases, estrofa 1, coro, paso a la estrofa 2, estrofa 2, coro otra vez y final. Las estrofas 3 y 4 repiten la música de la 2 con el mismo coro: se vuelve al coro desde el compás 17. Los acordes no vienen escritos: los deduje de las dos voces. Si el coro lo canta más grave, usa Tono más fácil (Sol).'},
 {n:266,t:'Si yo no tengo amor',pg:125,tonic:2,minor:false,lvl:'Medio',easy:-2,style:'arpegio',bpm:80,
  secs:[['Si yo no tengo amor… (coro)','Re Mim La7'],['Si yo no tengo amor…','Re La7 Re'],['El amor es comprensivo (estrofa)','Re La Sim Fa#m'],['el amor no tiene envidia','Sol Mim Re La7']],
  tip:'Coro de dos líneas y cinco estrofas con la misma música. Fa♯m es el acorde más incómodo; en Do (−2) pasa a Mim.'},
@@ -926,7 +928,7 @@ const SONGS=[
  secs:[['Cristo está conmigo (coro)','Do Fa Do'],['junto a mí va el Señor','Sol'],['me acompaña siempre','Do Fa Do'],['en mi vida hasta el fin','Sol Sol7 Do'],['Ya no temo, Señor, la tristeza (estrofa)','Do7 Fa Do'],['ya no temo, Señor, la soledad','Fa Do'],['porque eres, Señor, mi alegría','Rem Sol7 Lam'],['tengo siempre tu amistad','Fa Sol Sol7']],
  tip:'El mejor para empezar: Do mayor con teclas blancas. La única negra es Si♭ en Do7. Las estrofas 2 a 5 usan los mismos acordes.'}
 ];
-const PARTS=[['Otros cantos',[1001,1002,1003,1004]],['Canto de entrada',[28]],['Canto penitencial',[75]],['Aleluya',[125]],['Santo',[173]],['Cordero de Dios',[199]],['Comunión',[267,266,252,251,248]]];
+const PARTS=[['Otros cantos',[1001,1002,1003,1004]],['Canto de entrada',[28]],['Canto penitencial',[75]],['Aleluya',[125]],['Santo',[173]],['Cordero de Dios',[199]],['Comunión',[1005,266,252,251,248]]];
 const ST={};
 function songData(s){
   const t=ST[s.n]||0,tonic=(s.tonic+t+120)%12,flats=flatPref(tonic,s.minor);let k=0;

@@ -239,7 +239,7 @@ ol.tight{margin:0;padding-left:20px;display:grid;gap:4px}
         <option value="fund">Fundamental (siempre igual)</option>
       </select></div>
     <div class="fld"><label for="selStyle">Ritmo al escuchar</label><select id="selStyle"></select></div>
-    <div class="fld"><label for="rngBpm">Tempo <b id="bpmOut">100</b> bpm</label><input type="range" id="rngBpm" min="50" max="132" value="100"></div>
+    <div class="fld"><label for="rngBpm">Tempo <b id="bpmOut">100</b> bpm</label><input type="range" id="rngBpm" min="50" max="180" value="100"></div>
   </section>
 
   <nav class="tabs" aria-label="Secciones">
@@ -902,16 +902,20 @@ const SONGS=[
 {n:251,t:'No me habéis vosotros elegido',pg:119,tonic:2,minor:false,lvl:'Medio',easy:-2,style:'arpegio',bpm:76,
  secs:[['No me habéis vosotros elegido','Re La Sim'],['fui yo mismo quien os elegí','Sol Mim La'],['ya no os llamo siervos sino amigos','Re Fa#7 Sim'],['permaneceréis, para siempre, junto a mí','Re Sol Re']],
  tip:'Cuatro estrofas con los mismos acordes. El cambio clave es Fa♯7 a Sim: ensáyalo solo, despacio.'},
-{n:1001,tag:'CLN 702',t:'Cerca de Ti, Señor',src:'Cancionero litúrgico, p. 52 (partitura en Sol)',bar:3,tonic:7,minor:false,lvl:'Fácil',easy:0,style:'bloque',bpm:84,
- dur:'1.5 1.5 3 3 3 1.5 1.5 3 1.5 1.5 3 1.5 1.5 3 3 1.5 1.5',
- mel:'Si4/1.5 La4/1 Sol4/.5 Sol4/1 Mi4/.5 Mi4/1.5 Re4/1.5 Sol4/1 Si4/.5 La4/2.5 -/.5 Si4/1.5 La4/1 Sol4/.5 Sol4/1 Mi4/.5 Mi4/1.5 Re4/1 Sol4/.5 Fa#4/1 La4/.5 Sol4/2.5 -/.5 Re5/1.5 Mi5/1 Re5/.5 Re5/1 Si4/.5 Re5/1.5 Re5/1.5 Mi5/1 Re5/.5 Re5/1 Si4/.5 La4/1.5',
- secs:[['Cerca de Ti, Señor, yo quiero estar','Sol Re7 Do Sol Re7'],['Tu grande eterno amor, quiero gozar','Sol Re7 Do Sol Re7 Sol'],['Llena mi pobre ser, limpia mi corazón','Sol Do Sol Do Sol Re7']],
- tip:'Solo tres acordes: Sol, Do y Re7. Está en compás de 6/8: dos golpes de tres corcheas, que en la página se cuentan como 3 tiempos por compás. La partitura impresa está en Sol; el tono original que indica el libro es Fa (baja 2 semitonos con − ½ tono). La foto solo llega al compás 12, falta el resto de la tercera línea.'},
+{n:1001,tag:'Himno',t:'Cerca de Ti, Señor',src:'Partitura a 4 voces (Lowell Mason), versión completa',bar:6,tonic:7,minor:false,lvl:'Fácil',easy:0,style:'bloque',bpm:150,
+ dur:'3 3 6 6 6 3 3 6 2 4 6 2 4 6 2 4 3 3 3 3 6 2 4 6',
+ mel:'Si4/3 La4/2 Sol4/1 Sol4/2 Mi4/1 Mi4/3 Re4/2 Sol4/3 Si4/1 La4/5 -/1 Si4/3 La4/2 Sol4/1 Sol4/2 Mi4/1 Mi4/3 Re4/1 Sol4/1 Fa#4/2 La4/2 Sol4/5 -/1 Re5/2 Mi5/3 Re5/1 Re5/2 Si4/1 Re5/3 Re5/2 Mi5/3 Re5/1 Re5/2 Si4/1 La4/3 Si4/3 La4/2 Sol4/1 Sol4/2 Mi4/1 Mi4/3 Re4/1 Sol4/1 Fa#4/2 La4/2 Sol4/5 -/1',
+ secs:[['Cerca de Ti, Señor, quiero morar','Sol Re7 Do Sol Re7'],['Tu grande y tierno amor quiero gozar','Sol Re7 Do Sol Re7 Sol'],['Llena mi pobre ser, limpia mi corazón','Sol Do Sol Sol Do Sol Re7'],['Hazme tu rostro ver en comunión','Sol Re7 Do Sol Re7 Sol']],
+ tip:'Compás de 6/4: seis tiempos por compás, contados de negra en negra. Solo tres acordes: Sol, Do y Re7. La partitura no trae acordes escritos; los saqué de las voces del bajo y del tenor, igual que en la versión del cancionero. Tres estrofas con la misma música.'},
+{n:1002,tag:'Kyrie',t:'Señor, ten piedad',src:'Partitura de Alejandro Mejía Pereda, f.m.s.',bar:2,pick:2,tonic:4,minor:true,lvl:'Medio',easy:0,style:'bloque',bpm:84,
+ mel:'-/1 -/.5 Si3/.5 Mi4/.5 Re4/1 Mi4/1.5 -/.5 Fa#4/.5 Sol4/.5 Fa#4/1 Mi4/1.5 -/.5 Si3/.5 Mi4/.5 Re4/1 Mi4/1.5 -/.5 Fa#4/.5 Sol4/.5 Fa#4/1 Mi4/1.5 -/.5 Mi4/.5 La4/.5 Sol4/1 La4/1 Si4/.5 Do5/.5 Si4/.5 La4/.5 Sol4/1 Mi4/1.5 -/.5 Fa#4/.5 Sol4/.5 Fa#4/1 Mi4/1.5 -/.5 Fa#4/.5 Sol4/.5 Fa#4/1 Mi4/1.5 -/1 La4/.5 Sol4/1 La4/1.5 -/.5 Mi4/.5 La4/.5 Sol4/1 La4/1.5 -/1 La4/.5 Sol4/1 La4/1.5 -/.5 Mi4/.5 La4/.5 Sol4/1 La4/1.5 -/1 La4/.5 Si4/1 Do5/1 Re5/.5 Do5/.5 Si4/.5 Do5/.5 Si4/1 La4/1.5 -/.5 Mi4/.5 La4/.5 Sol#4/1 La4/1.5 -/.5 Mi4/.5 La4/.5 Sol#4/1 La4/1.5 -/1 La3/.5 La3/1 La3/.5 Do4/.5 Do4/1 Do4/.5 Mi4/.5 Sol4/1 Fa#4/.5 Si3/1 -/1 -/1 -/.5 Si3/.5 Mi4/.5 Re4/1 Mi4/1.5 -/.5 Fa#4/.5 Sol4/.5 Fa#4/1 Mi4/1.5 -/.5 Si3/.5 Mi4/.5 Re4/1 Mi4/1.5 -/.5 Fa#4/.5 Sol4/.5 Fa#4/1 Mi4/1.5 -/.5 Mi4/.5 La4/.5 Sol4/1 La4/1 Si4/.5 Do5/.5 Si4/.5 La4/.5 Sol4/1 Mi4/1.5 -/.5 Fa#4/.5 Sol4/.5 Fa#4/1 Mi4/1.5 -/.5 Fa#4/.5 Sol4/.5 Fa#4/1 Mi4/1.5 -/1',
+ secs:[['Señor, Señor… piedad (después de 1 compás de entrada)','Em Em B7 Em Em Em B7 Em'],['Señor, Señor… piedad, piedad (Fine)','Am Am Em Em B7 Em B7 Em'],['Cristo… piedad, piedad','Am Am Am Am Am Am Am Am'],['Cristo, Cristo… piedad, piedad','F Dm Am Am E7 Am E7 Am'],['Interludio sin letra','Am Am B7 B7'],['D.C.: se repite desde el inicio hasta Fine','B7 Em Em B7 Em Em Em B7 Em Am Am Em Em B7 Em B7 Em']],
+ tip:'Compás de 2/4, en Mi menor. Estructura: Señor (hasta Fine), Cristo, un interludio corto sin letra, y se repite Señor desde el inicio hasta Fine. En la repetición puse Si7 en el compás de entrada, que la partitura deja sin acorde. Acordes con teclas negras: Si7 (Re♯) y Mi7 (Sol♯).'},
 {n:248,t:'Cristo está conmigo',pg:118,tonic:0,minor:false,lvl:'Fácil',easy:0,style:'balada',bpm:84,
  secs:[['Cristo está conmigo (coro)','Do Fa Do'],['junto a mí va el Señor','Sol'],['me acompaña siempre','Do Fa Do'],['en mi vida hasta el fin','Sol Sol7 Do'],['Ya no temo, Señor, la tristeza (estrofa)','Do7 Fa Do'],['ya no temo, Señor, la soledad','Fa Do'],['porque eres, Señor, mi alegría','Rem Sol7 Lam'],['tengo siempre tu amistad','Fa Sol Sol7']],
  tip:'El mejor para empezar: Do mayor con teclas blancas. La única negra es Si♭ en Do7. Las estrofas 2 a 5 usan los mismos acordes.'}
 ];
-const PARTS=[['Otros cantos',[1001]],['Canto de entrada',[28]],['Canto penitencial',[75]],['Aleluya',[125]],['Santo',[173]],['Cordero de Dios',[199]],['Comunión',[267,266,252,251,248]]];
+const PARTS=[['Otros cantos',[1001,1002]],['Canto de entrada',[28]],['Canto penitencial',[75]],['Aleluya',[125]],['Santo',[173]],['Cordero de Dios',[199]],['Comunión',[267,266,252,251,248]]];
 const ST={};
 function songData(s){
   const t=ST[s.n]||0,tonic=(s.tonic+t+120)%12,flats=flatPref(tonic,s.minor);let k=0;
@@ -993,7 +997,7 @@ function setRollRange(lo,hi){
 setRollRange(48,76);
 /* Mano izquierda: acorde en posición fundamental, una octava abajo (raíz entre Fa2 y Mi3) */
 function rollLH(c){
-  const root=lowestAtOrAbove(c.root,41),notes=Q[c.q].map(x=>root+x);
+  const root=lowestAtOrAbove(c.root,40),notes=Q[c.q].map(x=>root+x);
   if(c.bass!==c.root){const b=lowestAtOrAbove(c.bass,root-12);if(b<root)notes.unshift(b);}
   return notes;
 }
@@ -1018,7 +1022,7 @@ function parseMel(txt,tt){
   return {out,bad,off,len:t0};
 }
 function buildRoll(){
-  const s=SONGS.find(x=>x.n===R.n),d=songData(s),tt=d.t>6?d.t-12:d.t,bars=s.bar||4,durs=(s.dur||'').split(' ').filter(Boolean).map(Number),ev=[];let st=0;R.bar=bars;
+  const s=SONGS.find(x=>x.n===R.n),d=songData(s),tt=d.t>6?d.t-12:d.t,bars=s.bar||4,durs=(s.dur||'').split(' ').filter(Boolean).map(Number),ev=[];let st=s.pick||0;R.bar=bars;
   R.flats=flatPref(d.tonic,s.minor);R.bpm=s.bpm;
   const mel=R.mel[R.n];let pm=null;
   if(mel){pm=parseMel(mel,tt);R.hasMel=pm.out.length>0;
